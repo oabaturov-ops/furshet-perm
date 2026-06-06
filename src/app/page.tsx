@@ -1,65 +1,1094 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+interface CartItem {
+  name: string;
+  price: string;
+  quantity: number;
+}
+
+import { useState, useEffect } from "react";
+
+/* ============================================
+   ДАННЫЕ САЙТА — навигация
+   ============================================ */
+/* Данные корзины */
+interface CartItem {
+  name: string;
+  price: string;
+  quantity: number;
+}
+   const heroImages = [
+  "/images/hero1.jpg",
+  "/images/hero2.jpg",
+  "/images/hero3.jpg",
+];
+
+/* Данные корзины */
+interface CartItem {
+  name: string;
+  price: string;
+  quantity: number;
+}
+const navLinks = [
+  { id: "home", label: "Главная" },
+  { id: "menu", label: "Меню фуршетов" },
+  { id: "recipes", label: "Рецепты от шеф-повара" },
+  { id: "about", label: "О нас" },
+  { id: "contacts", label: "Контакты" },
+];
+
+/* ============================================
+   NAV — фиксированная навигация
+   ============================================ */
+function Nav({ cartItems, onOpenCart }: { cartItems: CartItem[]; onOpenCart: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <nav style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 1000,
+      backgroundColor: "rgba(10, 10, 10, 0.95)",
+      backdropFilter: "blur(10px)",
+      borderBottom: "1px solid #333",
+      padding: "0 20px",
+    }}>
+      <div style={{
+        maxWidth: 1200,
+        margin: "0 auto",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        height: 70,
+      }}>
+        {/* ЛОГОТИП */}
+        <a href="#home" style={{
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}>
+          <img src="/favicon.ico" alt="logo" style={{ width: 36, height: 36 }} />
+          <span style={{
+            fontSize: 20,
+            fontWeight: 700,
+            color: "#fff",
+            letterSpacing: 1,
+          }}>
+            ФУРШЕТ <span style={{ color: "#e53935" }}>ПЕРМЬ</span>
+          </span>
+        </a>
+
+        {/* ДЕСКТОП МЕНЮ */}
+        <div style={{
+          display: "flex",
+          gap: 25,
+          alignItems: "center",
+        }}
+          className="desktop-nav"
+        >
+          {navLinks.map((link) => (
+            <a
+              key={link.id}
+              href={`#${link.id}`}
+              style={{
+                textDecoration: "none",
+                color: "#ccc",
+                fontSize: 14,
+                fontWeight: 500,
+                transition: "color 0.3s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#e53935")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#ccc")}
+            >
+              {link.label}
+            </a>
+          ))}
+          {/* КНОПКА КОРЗИНЫ */}
+                    <button
+            onClick={onOpenCart}
+            style={{
+              backgroundColor: "#e53935",
+              color: "#fff",
+              border: "none",
+              borderRadius: 25,
+              padding: "8px 18px",
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Корзина ({cartItems.reduce((s, i) => s + i.quantity, 0)})
+          </button>
+        </div>
+
+        {/* БУРГЕР — мобильное меню */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          style={{
+            display: "none",
+            background: "none",
+            border: "none",
+            color: "#fff",
+            fontSize: 28,
+            cursor: "pointer",
+          }}
+          className="burger-btn"
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+      </div>
+
+      {/* МОБИЛЬНОЕ ВЫПАДАЮЩЕЕ МЕНЮ */}
+      {menuOpen && (
+        <div style={{
+          backgroundColor: "rgba(10, 10, 10, 0.98)",
+          padding: "15px 20px",
+          borderTop: "1px solid #333",
+          display: "flex",
+          flexDirection: "column",
+          gap: 15,
+        }}
+          className="mobile-menu"
+        >
+          {navLinks.map((link) => (
+            <a
+              key={link.id}
+              href={`#${link.id}`}
+              onClick={() => setMenuOpen(false)}
+              style={{
+                textDecoration: "none",
+                color: "#ccc",
+                fontSize: 16,
+                padding: "8px 0",
+                borderBottom: "1px solid #222",
+              }}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </nav>
+  );
+}
+
+/* ============================================
+   HERO — главная секция
+   ============================================ */
+function Hero() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <section
+      id="home"
+      style={{
+        position: "relative",
+        height: "100vh",
+        minHeight: 600,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        overflow: "hidden",
+      }}
+    >
+      {/* Карусель фото с параллаксом */}
+      {heroImages.map((img, i) => (
+        <div
+          key={img}
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url('${img}')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+            opacity: currentSlide === i ? 1 : 0,
+            transition: "opacity 1.5s ease-in-out",
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+      ))}
+
+      {/* Тёмный оверлей */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        zIndex: 1,
+      }} />
+
+      {/* Контент */}
+      <div style={{
+        position: "relative",
+        zIndex: 2,
+        maxWidth: 800,
+        padding: "0 20px",
+      }}>
+        <h1 style={{
+          fontSize: 52,
+          fontWeight: 800,
+          color: "#fff",
+          margin: 0,
+          lineHeight: 1.2,
+          textTransform: "uppercase",
+        }}>
+          Фуршетное <span style={{ color: "#e53935" }}>обслуживание</span>
+          <br />в Перми
+        </h1>
+        <p style={{
+          fontSize: 20,
+          color: "#ccc",
+          marginTop: 20,
+          lineHeight: 1.6,
+          maxWidth: 600,
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}>
+          Создаём незабываемые впечатления для ваших мероприятий.
+          Высокая кухня, безупречный сервис и внимание к каждой детали.
+        </p>
+        <div style={{ marginTop: 35, display: "flex", gap: 15, justifyContent: "center", flexWrap: "wrap" }}>
+          <a href="#menu" style={{
+            display: "inline-block",
+            backgroundColor: "#e53935",
+            color: "#fff",
+            textDecoration: "none",
+            padding: "14px 35px",
+            borderRadius: 30,
+            fontSize: 16,
+            fontWeight: 600,
+          }}>
+            Смотреть меню
+          </a>
+          <a href="#contacts" style={{
+            display: "inline-block",
+            border: "2px solid #e53935",
+            color: "#e53935",
+            textDecoration: "none",
+            padding: "14px 35px",
+            borderRadius: 30,
+            fontSize: 16,
+            fontWeight: 600,
+          }}>
+            Заказать фуршет
+          </a>
+        </div>
+      </div>
+
+      {/* Точки-индикаторы карусели */}
+      <div style={{
+        position: "absolute",
+        bottom: 40,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 2,
+        display: "flex",
+        gap: 10,
+      }}>
+        {heroImages.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentSlide(i)}
+            style={{
+              width: currentSlide === i ? 30 : 12,
+              height: 12,
+              borderRadius: 6,
+              backgroundColor: currentSlide === i ? "#e53935" : "rgba(255,255,255,0.4)",
+              border: "none",
+              cursor: "pointer",
+              transition: "all 0.3s",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Красная полоса снизу */}
+      <div style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 4,
+        backgroundColor: "#e53935",
+        zIndex: 2,
+      }} />
+    </section>
+  );
+}
+/* ============================================
+   МЕНЮ ФУРШЕТОВ — карточки блюд
+   ============================================ */
+const menuCategories = [
+  {
+    title: "Холодные закуски",
+    items: [
+      { name: "Ассорти мясное", desc: "Бастурма, суджук, сыровяленая говядина", price: "850 ₽" },
+      { name: "Сырная тарелка", desc: "Бри, камамбер, Dor Blue, грана падано", price: "750 ₽" },
+      { name: "Канапе с лососем", desc: "Сливочный сыр, каперсы, укроп", price: "480 ₽" },
+      { name: "Тарталетки с грибами", desc: "Шампиньоны, сливочный соус, зелень", price: "350 ₽" },
+    ],
+  },
+  {
+    title: "Горячие закуски",
+    items: [
+      { name: "Мини-крокеты", desc: "Курица, картофель, трюфельный майонез", price: "420 ₽" },
+      { name: "Шашлычки из индейки", desc: "Маринованная индейка, соус BBQ", price: "520 ₽" },
+      { name: "Брускетты", desc: "Томаты, моцарелла, базилик, бальзамик", price: "380 ₽" },
+      { name: "Фаршированные шампиньоны", desc: "Креветки, сыр, чесночный соус", price: "450 ₽" },
+    ],
+  },
+  {
+    title: "Десерты",
+    items: [
+      { name: "Мини-тирамису", desc: "Маскарпоне, кофе, какао", price: "320 ₽" },
+      { name: "Шоколадный фондан", desc: "Тёплый шоколад, ванильное мороженое", price: "380 ₽" },
+      { name: "Фруктовые канапе", desc: "Клубника, киви, ананас, шоколадный соус", price: "280 ₽" },
+      { name: "Макаруны (ассорти)", desc: "Писташка, малина, карамель, ваниль", price: "450 ₽" },
+    ],
+  },
+];
+
+function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>> }) {
+  const [activeCategory, setActiveCategory] = useState(0);
+  const category = menuCategories[activeCategory];
+
+  return (
+    <section id="menu" style={{
+      padding: "80px 20px",
+      backgroundColor: "#0a0a0a",
+    }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        {/* Заголовок */}
+        <h2 style={{
+          textAlign: "center",
+          fontSize: 38,
+          fontWeight: 800,
+          color: "#fff",
+          margin: "0 0 10px 0",
+          textTransform: "uppercase",
+        }}>
+          Меню <span style={{ color: "#e53935" }}>фуршетов</span>
+        </h2>
+        <p style={{
+          textAlign: "center",
+          color: "#888",
+          fontSize: 16,
+          margin: "0 0 40px 0",
+        }}>
+          Выберите категорию и добавьте блюда в корзину
+        </p>
+
+        {/* Переключатель категорий */}
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: 10,
+          marginBottom: 40,
+          flexWrap: "wrap",
+        }}>
+          {menuCategories.map((cat, i) => (
+            <button
+              key={cat.title}
+              onClick={() => setActiveCategory(i)}
+              style={{
+                padding: "10px 24px",
+                borderRadius: 25,
+                border: activeCategory === i ? "none" : "1px solid #444",
+                backgroundColor: activeCategory === i ? "#e53935" : "transparent",
+                color: activeCategory === i ? "#fff" : "#ccc",
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.3s",
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              {cat.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Карточки блюд */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          gap: 20,
+        }}>
+          {category.items.map((item) => (
+            <div key={item.name} style={{
+              backgroundColor: "#1a1a1a",
+              borderRadius: 12,
+              padding: 24,
+              border: "1px solid #2a2a2a",
+              transition: "transform 0.3s, border-color 0.3s",
+            }}>
+              <h3 style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#fff",
+                margin: "0 0 8px 0",
+              }}>
+                {item.name}
+              </h3>
+              <p style={{
+                fontSize: 14,
+                color: "#888",
+                margin: "0 0 15px 0",
+                lineHeight: 1.5,
+              }}>
+                {item.desc}
+              </p>
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}>
+                <span style={{
+                  fontSize: 20,
+                  fontWeight: 800,
+                  color: "#e53935",
+                }}>
+                  {item.price}
+                </span>
+                <button
+                  onClick={() => {
+                    const ex = cartItems.find((c) => c.name === item.name);
+                    if (ex) {
+                      setCartItems(cartItems.map((c) => c.name === item.name ? { ...c, quantity: c.quantity + 1 } : c));
+                    } else {
+                      setCartItems([...cartItems, { name: item.name, price: item.price, quantity: 1 }]);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: "#e53935",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 20,
+                    padding: "8px 18px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "background-color 0.3s",
+                  }}
+                >
+                  + В корзину
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+/* ============================================
+   РЕЦЕПТЫ ОТ ШЕФА
+   ============================================ */
+const recipes = [
+  {
+    id: 1,
+    title: "Тартар из лосося",
+    desc: "Свежий лосось, авокадо, каперсы, красный лук, лимонный сок, оливковое масло. Подача на хрустящем тосте с микрозеленью.",
+    time: "30 мин",
+    difficulty: "Средне",
+    ingredients: ["Лосось 300г", "Авокадо 1 шт", "Каперсы 2 ст.л.", "Лимон 1 шт", "Оливковое масло"],
+  },
+  {
+    id: 2,
+    title: "Фондю из трёх сыров",
+    desc: "Грюйер, Эмменталь и Камамбер с белым вином и чесноком. Подаётся с хлебными кубиками, яблоком и виноградом.",
+    time: "20 мин",
+    difficulty: "Легко",
+    ingredients: ["Грюйер 150г", "Эмменталь 150г", "Камамбер 100г", "Белое вино 100мл", "Чеснок 2 зубчика"],
+  },
+  {
+    id: 3,
+    title: "Мини-картофель гратен",
+    desc: "Тонкие слои картофеля с сливками, мускатным орехом и тремя видами сыра. Идеальная горячая закуска для фуршета.",
+    time: "60 мин",
+    difficulty: "Средне",
+    ingredients: ["Картофель 1кг", "Сливки 33% 300мл", "Грюйер 100г", "Пармезан 50г", "Мускатный орех"],
+  },
+  {
+    id: 4,
+    title: "Рулетики из баклажанов",
+    desc: "Запечённые баклажаны с рикоттой, томатами черри, базиликом и бальзамической глазурью. Лёгкая и элегантная закуска.",
+    time: "45 мин",
+    difficulty: "Легко",
+    ingredients: ["Баклажаны 2 шт", "Рикотта 200г", "Черри 10 шт", "Базилик", "Бальзамик"],
+  },
+  {
+    id: 5,
+    title: "Шоколадный мусс с малиной",
+    desc: "Воздушный тёмный шоколад (70%) с взбитыми сливками и свежей малиной. Подаётся в стеклянных бокалах.",
+    time: "25 мин + 2ч",
+    difficulty: "Средне",
+    ingredients: ["Шоколад 70% 200г", "Сливки 33% 200мл", "Малина 150г", "Сахар 30г", "Яйца 2 шт"],
+  },
+  {
+    id: 6,
+    title: "Канапе «Императорское»",
+    desc: "Креветки, икра лосося, сливочный сыр, огурец и лимон на хрустящих тостах. Праздничная классика.",
+    time: "20 мин",
+    difficulty: "Легко",
+    ingredients: ["Креветки 200г", "Икра лосося 50г", "Сливочный сыр 150г", "Огурец 1 шт", "Тосты"],
+  },
+];
+
+function RecipesSection() {
+  const [openRecipe, setOpenRecipe] = useState<number | null>(null);
+
+  return (
+    <section id="recipes" style={{
+      padding: "80px 20px",
+      backgroundColor: "#111",
+    }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        {/* Заголовок */}
+        <h2 style={{
+          textAlign: "center",
+          fontSize: 38,
+          fontWeight: 800,
+          color: "#fff",
+          margin: "0 0 10px 0",
+          textTransform: "uppercase",
+        }}>
+          Рецепты <span style={{ color: "#e53935" }}>от шефа</span>
+        </h2>
+        <p style={{
+          textAlign: "center",
+          color: "#888",
+          fontSize: 16,
+          margin: "0 0 40px 0",
+        }}>
+          Секреты нашей кухни — попробуйте повторить дома
+        </p>
+
+        {/* Сетка рецептов */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: 25,
+        }}>
+          {recipes.map((recipe) => (
+            <div key={recipe.id} style={{
+              backgroundColor: "#1a1a1a",
+              borderRadius: 12,
+              border: "1px solid #2a2a2a",
+              overflow: "hidden",
+              transition: "transform 0.3s",
+            }}>
+              {/* Шапка рецепта */}
+              <div style={{
+                padding: "20px 24px",
+                borderBottom: openRecipe === recipe.id ? "1px solid #e53935" : "none",
+              }}>
+                <div style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}>
+                  <span style={{
+                    backgroundColor: "#e53935",
+                    color: "#fff",
+                    padding: "3px 10px",
+                    borderRadius: 12,
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}>
+                    {recipe.difficulty}
+                  </span>
+                  <span style={{ color: "#888", fontSize: 13 }}>
+                    ⏱ {recipe.time}
+                  </span>
+                </div>
+                <h3 style={{
+                  fontSize: 20,
+                  fontWeight: 700,
+                  color: "#fff",
+                  margin: "0 0 8px 0",
+                }}>
+                  {recipe.title}
+                </h3>
+                <p style={{
+                  fontSize: 14,
+                  color: "#888",
+                  lineHeight: 1.6,
+                  margin: 0,
+                }}>
+                  {recipe.desc}
+                </p>
+              </div>
+
+              {/* Кнопка раскрытия */}
+              <button
+                onClick={() => setOpenRecipe(openRecipe === recipe.id ? null : recipe.id)}
+                style={{
+                  width: "100%",
+                  padding: "12px 24px",
+                  backgroundColor: "#1a1a1a",
+                  borderTop: "1px solid #2a2a2a",
+                  color: openRecipe === recipe.id ? "#e53935" : "#ccc",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  transition: "color 0.3s",
+                }}
+              >
+                {openRecipe === recipe.id ? "▲ Скрыть ингредиенты" : "▼ Показать ингредиенты"}
+              </button>
+
+              {/* Раскрывающийся список ингредиентов */}
+              {openRecipe === recipe.id && (
+                <div style={{
+                  padding: "16px 24px",
+                  backgroundColor: "#151515",
+                  borderTop: "1px solid #2a2a2a",
+                }}>
+                  <p style={{
+                    fontSize: 13,
+                    color: "#e53935",
+                    fontWeight: 700,
+                    margin: "0 0 10px 0",
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                  }}>
+                    Ингредиенты:
+                  </p>
+                  <ul style={{
+                    margin: 0,
+                    paddingLeft: 20,
+                    color: "#ccc",
+                    fontSize: 14,
+                    lineHeight: 2,
+                  }}>
+                    {recipe.ingredients.map((ing, i) => (
+                      <li key={i}>{ing}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+/* ============================================
+   О НАС
+   ============================================ */
+const advantages = [
+  { icon: "🏆", title: "более 10 лет опыта", desc: "Более 500 проведённых мероприятий в Перми и Прикамье" },
+  { icon: "👨‍🍳", title: "Шеф-повар", desc: "Профессиональный шеф-повар с опытом в ресторанах высшей категории" },
+  { icon: "✨", title: "Свежие продукты", desc: "Только свежие и натуральные продукты от местных поставщиков" },
+  { icon: "🎯", title: "Под ключ", desc: "Полный цикл: от разработки меню до подачи и уборки" },
+  { icon: "💰", title: "Прозрачные цены", desc: "Фиксированная стоимость без скрытых доплат и наценок" },
+  { icon: "🚚", title: "Доставка", desc: "Доставка по Перми и пригороду, выезд на любую локацию" },
+];
+
+function AboutSection() {
+  return (
+    <section id="about" style={{
+      padding: "80px 20px",
+      backgroundColor: "#0a0a0a",
+    }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        {/* Заголовок */}
+        <h2 style={{
+          textAlign: "center",
+          fontSize: 38,
+          fontWeight: 800,
+          color: "#fff",
+          margin: "0 0 10px 0",
+          textTransform: "uppercase",
+        }}>
+          О <span style={{ color: "#e53935" }}>нас</span>
+        </h2>
+        <p style={{
+          textAlign: "center",
+          color: "#888",
+          fontSize: 16,
+          margin: "0 0 20px 0",
+          maxWidth: 600,
+          marginLeft: "auto",
+          marginRight: "auto",
+          lineHeight: 1.7,
+        }}>
+          Мы — команда профессионалов, которые превращают любое мероприятие в незабываемое гастрономическое событие
+        </p>
+
+        {/* Текстовый блок */}
+        <div style={{
+          maxWidth: 800,
+          margin: "0 auto 50px auto",
+          textAlign: "center",
+        }}>
+          <p style={{
+            color: "#bbb",
+            fontSize: 16,
+            lineHeight: 1.8,
+          }}>
+            Компания «Фуршет Пермь» работает на рынке кейтеринговых услуг с 2015 года. За это время мы обслужили более 500 мероприятий — от небольших семейных праздников до крупных корпоративов на 500+ человек. Наша философия — сочетание ресторанного качества с домашним теплом. Мы верим, что каждая тарелка должна быть не только вкусной, но и красивой, а сервис — незаметным и безупречным.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Преимущества — сетка */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: 20,
+        }}>
+          {advantages.map((item) => (
+            <div key={item.title} style={{
+              backgroundColor: "#1a1a1a",
+              borderRadius: 12,
+              padding: "24px 20px",
+              border: "1px solid #2a2a2a",
+              textAlign: "center",
+            }}>
+              <div style={{
+                fontSize: 40,
+                marginBottom: 12,
+              }}>
+                {item.icon}
+              </div>
+              <h3 style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#fff",
+                margin: "0 0 8px 0",
+              }}>
+                {item.title}
+              </h3>
+              <p style={{
+                fontSize: 14,
+                color: "#888",
+                margin: 0,
+                lineHeight: 1.5,
+              }}>
+                {item.desc}
+              </p>
+            </div>
+          ))}
         </div>
-      </main>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================
+   КОНТАКТЫ
+   ============================================ */
+function ContactsSection() {
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    date: "",
+    guests: "",
+    message: "",
+  });
+  const [formStatus, setFormStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormStatus("sending");
+    /* Здесь потом подключим Telegram bot или API */
+    setTimeout(() => {
+      setFormStatus("sent");
+      setFormData({ name: "", phone: "", date: "", guests: "", message: "" });
+      setTimeout(() => setFormStatus("idle"), 3000);
+    }, 1500);
+  };
+
+  return (
+    <section id="contacts" style={{
+      padding: "80px 20px",
+      backgroundColor: "#111",
+    }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        {/* Заголовок */}
+        <h2 style={{
+          textAlign: "center",
+          fontSize: 38,
+          fontWeight: 800,
+          color: "#fff",
+          margin: "0 0 10px 0",
+          textTransform: "uppercase",
+        }}>
+          <span style={{ color: "#e53935" }}>Контакты</span>
+        </h2>
+        <p style={{
+          textAlign: "center",
+          color: "#888",
+          fontSize: 16,
+          margin: "0 0 50px 0",
+        }}>
+          Свяжитесь с нами для заказа и расчёта стоимости
+        </p>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 40,
+          alignItems: "start",
+        }}
+          className="contacts-grid"
+        >
+          {/* Левая колонка — инфо */}
+          <div>
+            <div style={{
+              backgroundColor: "#1a1a1a",
+              borderRadius: 12,
+              padding: 30,
+              border: "1px solid #2a2a2a",
+              marginBottom: 20,
+            }}>
+              <h3 style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#fff",
+                margin: "0 0 20px 0",
+              }}>
+                Свяжитесь с нами
+              </h3>
+
+              {[
+                { icon: "📞", label: "Телефон", value: "+7 (342) 000-00-00", href: "tel:+73420000000" },
+                { icon: "💬", label: "WhatsApp", value: "+7 900 000-00-00", href: "https://wa.me/79000000000" },
+                { icon: "✈️", label: "Telegram", value: "@furshet_perm", href: "https://t.me/furshet_perm" },
+                { icon: "📧", label: "Email", value: "info@furshet-perm.ru", href: "mailto:info@furshet-perm.ru" },
+              ].map((contact) => (
+                <a
+                  key={contact.label}
+                  href={contact.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "12px 0",
+                    borderBottom: "1px solid #222",
+                    textDecoration: "none",
+                    color: "#ccc",
+                    transition: "color 0.3s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#e53935")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#ccc")}
+                >
+                  <span style={{ fontSize: 22 }}>{contact.icon}</span>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#666" }}>{contact.label}</div>
+                    <div style={{ fontSize: 15, fontWeight: 500 }}>{contact.value}</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            {/* Адрес */}
+            <div style={{
+              backgroundColor: "#1a1a1a",
+              borderRadius: 12,
+              padding: 30,
+              border: "1px solid #2a2a2a",
+            }}>
+              <h3 style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#fff",
+                margin: "0 0 10px 0",
+              }}>
+                📍 Адрес
+              </h3>
+              <p style={{
+                color: "#ccc",
+                fontSize: 15,
+                lineHeight: 1.6,
+                margin: 0,
+              }}>
+                г. Пермь, ул. Примерная, д. 1<br />
+                (здесь будет реальный адрес)
+              </p>
+            </div>
+          </div>
+
+          {/* Правая колонка — форма */}
+          <div style={{
+            backgroundColor: "#1a1a1a",
+            borderRadius: 12,
+            padding: 30,
+            border: "1px solid #2a2a2a",
+          }}>
+            <h3 style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: "#fff",
+              margin: "0 0 20px 0",
+            }}>
+              Оставить заявку
+            </h3>
+            <form onSubmit={handleSubmit}>
+              {[
+                { key: "name", placeholder: "Ваше имя *", type: "text" },
+                { key: "phone", placeholder: "Телефон *", type: "tel" },
+                { key: "date", placeholder: "Дата мероприятия", type: "date" },
+                { key: "guests", placeholder: "Количество гостей", type: "text" },
+              ].map((field) => (
+                <input
+                  key={field.key}
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  required={field.key === "name" || field.key === "phone"}
+                  value={formData[field.key as keyof typeof formData]}
+                  onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    marginBottom: 14,
+                    backgroundColor: "#0a0a0a",
+                    border: "1px solid #333",
+                    borderRadius: 8,
+                    color: "#fff",
+                    fontSize: 14,
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              ))}
+              <textarea
+                placeholder="Пожелания к меню, детали мероприятия..."
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                rows={4}
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  marginBottom: 14,
+                  backgroundColor: "#0a0a0a",
+                  border: "1px solid #333",
+                  borderRadius: 8,
+                  color: "#fff",
+                  fontSize: 14,
+                  outline: "none",
+                  resize: "vertical",
+                  fontFamily: "inherit",
+                  boxSizing: "border-box",
+                }}
+              />
+              <button
+                type="submit"
+                disabled={formStatus === "sending"}
+                style={{
+                  width: "100%",
+                  padding: "14px",
+                  backgroundColor: formStatus === "sent" ? "#2e7d32" : "#e53935",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  fontSize: 16,
+                  fontWeight: 700,
+                  cursor: formStatus === "sending" ? "wait" : "pointer",
+                  transition: "background-color 0.3s",
+                }}
+              >
+                {formStatus === "sending" ? "Отправка..." : formStatus === "sent" ? "✓ Заявка отправлена!" : "Отправить заявку"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+function CartModal({ cartItems, setCartItems, isOpen, onClose }: { cartItems: CartItem[]; setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>>; isOpen: boolean; onClose: () => void }) {
+  const total = cartItems.reduce((sum, item) => sum + parseInt(item.price.replace(/\D/g, "")) * item.quantity, 0);
+  if (!isOpen) return null;
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.7)" }} />
+      <div style={{ position: "relative", backgroundColor: "#1a1a1a", borderRadius: 16, border: "1px solid #333", maxWidth: 500, width: "90%", maxHeight: "80vh", overflow: "auto", padding: 30 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: "#fff", margin: 0 }}>Корзина</h2>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#888", fontSize: 28, cursor: "pointer" }}>X</button>
+        </div>
+        {cartItems.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#888", fontSize: 16, padding: "40px 0" }}>Корзина пуста</p>
+        ) : (
+          <>
+            {cartItems.map((item) => (
+              <div key={item.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid #222" }}>
+                <div>
+                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 15 }}>{item.name}</div>
+                  <div style={{ color: "#888", fontSize: 13 }}>{item.price} x {item.quantity}</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <button onClick={() => setCartItems(item.quantity === 1 ? cartItems.filter((c) => c.name !== item.name) : cartItems.map((c) => c.name === item.name ? { ...c, quantity: c.quantity - 1 } : c))} style={{ width: 30, height: 30, borderRadius: "50%", backgroundColor: "#333", color: "#fff", border: "none", fontSize: 16, cursor: "pointer" }}>-</button>
+                  <span style={{ color: "#fff", fontWeight: 600, minWidth: 20, textAlign: "center" }}>{item.quantity}</span>
+                  <button onClick={() => setCartItems(cartItems.map((c) => c.name === item.name ? { ...c, quantity: c.quantity + 1 } : c))} style={{ width: 30, height: 30, borderRadius: "50%", backgroundColor: "#e53935", color: "#fff", border: "none", fontSize: 16, cursor: "pointer" }}>+</button>
+                </div>
+              </div>
+            ))}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 0 0 0", borderTop: "2px solid #e53935", marginTop: 10 }}>
+              <span style={{ color: "#fff", fontSize: 18, fontWeight: 700 }}>Итого:</span>
+              <span style={{ color: "#e53935", fontSize: 24, fontWeight: 800 }}>{total} руб.</span>
+            </div>
+            <button onClick={() => { alert("Заказ отправлен!"); setCartItems([]); onClose(); }} style={{ width: "100%", marginTop: 20, padding: 14, backgroundColor: "#e53935", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 700, cursor: "pointer" }}>Оформить заказ</button>
+          </>
+        )}
+      </div>
     </div>
+  );
+}
+/* ============================================
+   FOOTER — временный заглушка (позже расширим)
+   ============================================ */
+function Footer() {
+  return (
+    <footer style={{
+      backgroundColor: "#0a0a0a",
+      borderTop: "1px solid #333",
+      padding: "30px 20px",
+      textAlign: "center",
+      color: "#666",
+      fontSize: 14,
+    }}>
+      <p style={{ margin: 0 }}>
+        © {new Date().getFullYear()} Фуршет Пермь. Все права защищены.
+      </p>
+    </footer>
+  );
+}
+
+/* ============================================
+   ГЛАВНАЯ СТРАНИЦА
+   ============================================ */
+export default function Home() {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  return (
+    <main>
+      <Nav cartItems={cartItems} onOpenCart={() => setCartOpen(true)} />
+      <Hero />
+      <MenuSection cartItems={cartItems} setCartItems={setCartItems} />
+      <RecipesSection />
+      <AboutSection />
+      <ContactsSection />
+      <Footer />
+      <CartModal cartItems={cartItems} setCartItems={setCartItems} isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+    </main>
   );
 }
