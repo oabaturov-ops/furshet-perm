@@ -325,171 +325,7 @@ function Hero() {
     </section>
   );
 }
-/* ============================================
-   МЕНЮ ФУРШЕТОВ — карточки блюд
-   ============================================ */
-const menuCategories = [
-  {
-    title: "Холодные закуски",
-    items: [
-      { name: "Ассорти мясное", desc: "Бастурма, суджук, сыровяленая говядина", price: "850 ₽" },
-      { name: "Сырная тарелка", desc: "Бри, камамбер, Dor Blue, грана падано", price: "750 ₽" },
-      { name: "Канапе с лососем", desc: "Сливочный сыр, каперсы, укроп", price: "480 ₽" },
-      { name: "Тарталетки с грибами", desc: "Шампиньоны, сливочный соус, зелень", price: "350 ₽" },
-    ],
-  },
-  {
-    title: "Горячие закуски",
-    items: [
-      { name: "Мини-крокеты", desc: "Курица, картофель, трюфельный майонез", price: "420 ₽" },
-      { name: "Шашлычки из индейки", desc: "Маринованная индейка, соус BBQ", price: "520 ₽" },
-      { name: "Брускетты", desc: "Томаты, моцарелла, базилик, бальзамик", price: "380 ₽" },
-      { name: "Фаршированные шампиньоны", desc: "Креветки, сыр, чесночный соус", price: "450 ₽" },
-    ],
-  },
-  {
-    title: "Десерты",
-    items: [
-      { name: "Мини-тирамису", desc: "Маскарпоне, кофе, какао", price: "320 ₽" },
-      { name: "Шоколадный фондан", desc: "Тёплый шоколад, ванильное мороженое", price: "380 ₽" },
-      { name: "Фруктовые канапе", desc: "Клубника, киви, ананас, шоколадный соус", price: "280 ₽" },
-      { name: "Макаруны (ассорти)", desc: "Писташка, малина, карамель, ваниль", price: "450 ₽" },
-    ],
-  },
-];
 
-function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>> }) {
-  const [activeCategory, setActiveCategory] = useState(0);
-  const category = menuCategories[activeCategory];
-
-  return (
-    <section id="menu" style={{
-      padding: "80px 20px",
-      backgroundColor: "#0a0a0a",
-    }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        {/* Заголовок */}
-        <h2 style={{
-          textAlign: "center",
-          fontSize: 38,
-          fontWeight: 800,
-          color: "#fff",
-          margin: "0 0 10px 0",
-          textTransform: "uppercase",
-        }}>
-          Меню <span style={{ color: "#e53935" }}>фуршетов</span>
-        </h2>
-        <p style={{
-          textAlign: "center",
-          color: "#888",
-          fontSize: 16,
-          margin: "0 0 40px 0",
-        }}>
-          Выберите категорию и добавьте блюда в корзину
-        </p>
-
-        {/* Переключатель категорий */}
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 10,
-          marginBottom: 40,
-          flexWrap: "wrap",
-        }}>
-          {menuCategories.map((cat, i) => (
-            <button
-              key={cat.title}
-              onClick={() => setActiveCategory(i)}
-              style={{
-                padding: "10px 24px",
-                borderRadius: 25,
-                border: activeCategory === i ? "none" : "1px solid #444",
-                backgroundColor: activeCategory === i ? "#e53935" : "transparent",
-                color: activeCategory === i ? "#fff" : "#ccc",
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "all 0.3s",
-              }}
-            >
-              {cat.title}
-            </button>
-          ))}
-        </div>
-
-        {/* Карточки блюд */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-          gap: 20,
-        }}>
-          {category.items.map((item) => (
-            <div key={item.name} style={{
-              backgroundColor: "#1a1a1a",
-              borderRadius: 12,
-              padding: 24,
-              border: "1px solid #2a2a2a",
-              transition: "transform 0.3s, border-color 0.3s",
-            }}>
-              <h3 style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: "#fff",
-                margin: "0 0 8px 0",
-              }}>
-                {item.name}
-              </h3>
-              <p style={{
-                fontSize: 14,
-                color: "#888",
-                margin: "0 0 15px 0",
-                lineHeight: 1.5,
-              }}>
-                {item.desc}
-              </p>
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}>
-                <span style={{
-                  fontSize: 20,
-                  fontWeight: 800,
-                  color: "#e53935",
-                }}>
-                  {item.price}
-                </span>
-                <button
-                  onClick={() => {
-                    const ex = cartItems.find((c) => c.name === item.name);
-                    if (ex) {
-                      setCartItems(cartItems.map((c) => c.name === item.name ? { ...c, quantity: c.quantity + 1 } : c));
-                    } else {
-                      setCartItems([...cartItems, { name: item.name, price: item.price, quantity: 1 }]);
-                    }
-                  }}
-                  style={{
-                    backgroundColor: "#e53935",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 20,
-                    padding: "8px 18px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "background-color 0.3s",
-                  }}
-                >
-                  + В корзину
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 /* ============================================
    РЕЦЕПТЫ ОТ ШЕФА
    ============================================ */
@@ -690,12 +526,12 @@ function RecipesSection() {
    О НАС
    ============================================ */
 const advantages = [
-  { icon: "🏆", title: "более 10 лет опыта", desc: "Более 500 проведённых мероприятий в Перми и Прикамье" },
+  { icon: "🏆", title: "Более 10 лет опыта", desc: "Более 300 проведённых мероприятий в Перми" },
   { icon: "👨‍🍳", title: "Шеф-повар", desc: "Профессиональный шеф-повар с опытом в ресторанах высшей категории" },
   { icon: "✨", title: "Свежие продукты", desc: "Только свежие и натуральные продукты от местных поставщиков" },
   { icon: "🎯", title: "Под ключ", desc: "Полный цикл: от разработки меню до подачи и уборки" },
   { icon: "💰", title: "Прозрачные цены", desc: "Фиксированная стоимость без скрытых доплат и наценок" },
-  { icon: "🚚", title: "Доставка", desc: "Доставка по Перми и пригороду, выезд на любую локацию" },
+  { icon: "🚚", title: "Доставка", desc: "Доставка по Перми. Бесплатная доставка при заказе от 15000 ₽ по городу. Отдалённые районы уточнить при заказе" },
 ];
 
 function AboutSection() {
@@ -865,10 +701,10 @@ function ContactsSection() {
               </h3>
 
               {[
-                { icon: "📞", label: "Телефон", value: "+7 (342) 000-00-00", href: "tel:+73420000000" },
-                { icon: "💬", label: "WhatsApp", value: "+7 900 000-00-00", href: "https://wa.me/79000000000" },
-                { icon: "✈️", label: "Telegram", value: "@furshet_perm", href: "https://t.me/furshet_perm" },
-                { icon: "📧", label: "Email", value: "info@furshet-perm.ru", href: "mailto:info@furshet-perm.ru" },
+                { icon: "📞", label: "Телефон", value: "+7 (902) 809 2149", href: "tel:+7 (902) 809 2149" },
+                //{ icon: "💬", label: "WhatsApp", value: "+7 900 000-00-00", href: "https://wa.me/79000000000" },
+                //{ icon: "✈️", label: "Telegram", value: "@furshet_perm", href: "https://t.me/furshet_perm" },
+                { icon: "📧", label: "Email", value: "info@furshet-perm.ru", href: "mailto:furshetperm159@yandex.ru" },
               ].map((contact) => (
                 <a
                   key={contact.label}
@@ -1014,6 +850,7 @@ function ContactsSection() {
 }
 function CartModal({ cartItems, setCartItems, isOpen, onClose }: { cartItems: CartItem[]; setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>>; isOpen: boolean; onClose: () => void }) {
   const total = cartItems.reduce((sum, item) => sum + parseInt(item.price.replace(/\D/g, "")) * item.quantity, 0);
+  const [sending, setSending] = useState(false);
   if (!isOpen) return null;
 
   return (
@@ -1045,11 +882,225 @@ function CartModal({ cartItems, setCartItems, isOpen, onClose }: { cartItems: Ca
               <span style={{ color: "#fff", fontSize: 18, fontWeight: 700 }}>Итого:</span>
               <span style={{ color: "#e53935", fontSize: 24, fontWeight: 800 }}>{total} руб.</span>
             </div>
-            <button onClick={() => { alert("Заказ отправлен!"); setCartItems([]); onClose(); }} style={{ width: "100%", marginTop: 20, padding: 14, backgroundColor: "#e53935", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 700, cursor: "pointer" }}>Оформить заказ</button>
+            <button
+  onClick={async () => {
+    setSending(true);
+    try {
+      const res = await fetch('/api/send-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: 'Онлайн-заказ',
+          customerPhone: 'Не указан',
+          items: cartItems.map(item => ({ name: item.name, price: item.price, quantity: item.quantity })),
+          totalPrice: total,
+          comment: ''
+        })
+      });
+      if (res.ok) {
+        setCartItems([]);
+        onClose();
+      } else {
+        alert('Ошибка отправки заказа, позвоните нам');
+      }
+    } catch {
+      alert('Нет связи с сервером, позвоните нам');
+    } finally {
+      setSending(false);
+    }
+  }}
+  disabled={sending}
+  style={{ width: "100%", marginTop: 20, padding: 14, backgroundColor: sending ? "#666" : "#e53935", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 700, cursor: sending ? "not-allowed" : "pointer" }}
+>
+  {sending ? "Отправка..." : "Оформить заказ"}
+</button>
           </>
         )}
       </div>
     </div>
+  );
+}
+
+function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>> }) {
+  const [menuCategories, setMenuCategories] = useState<{title: string, items: {name: string, desc: string, price: string}[]}[]>([]);
+  const [activeCategory, setActiveCategory] = useState(0);
+  const [menuLoading, setMenuLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadMenu() {
+      try {
+        const [catRes, dishRes] = await Promise.all([
+          fetch('/api/menu/categories'),
+          fetch('/api/menu/dishes'),
+        ]);
+        if (!catRes.ok || !dishRes.ok) return;
+        const categories = await catRes.json();
+        const dishes = await dishRes.json();
+        const menu = categories
+          .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
+          .map((cat: any) => ({
+            title: cat.name,
+            items: dishes
+              .filter((d: any) => d.categoryId === cat.id)
+              .sort((a: any, b: any) => a.sortOrder - b.sortOrder)
+              .map((d: any) => ({
+                name: d.name,
+                desc: d.description,
+                price: d.price + ' \u20BD',
+              })),
+          }))
+          .filter((cat: any) => cat.items.length > 0);
+        setMenuCategories(menu);
+      } catch (e) {
+        console.error('Failed to load menu:', e);
+      } finally {
+        setMenuLoading(false);
+      }
+    }
+    loadMenu();
+  }, []);
+
+  if (menuLoading) {
+    return (
+      <section id="menu" style={{ padding: "80px 20px", backgroundColor: "#0a0a0a" }}>
+        <p style={{ textAlign: "center", color: "#888" }}>Загрузка меню...</p>
+      </section>
+    );
+  }
+
+  if (!menuCategories.length) {
+    return (
+      <section id="menu" style={{ padding: "80px 20px", backgroundColor: "#0a0a0a" }}>
+        <p style={{ textAlign: "center", color: "#888" }}>Меню пока пустое</p>
+      </section>
+    );
+  }
+
+  const category = menuCategories[activeCategory];
+
+  return (
+    <section id="menu" style={{
+      padding: "80px 20px",
+      backgroundColor: "#0a0a0a",
+    }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <h2 style={{
+          textAlign: "center",
+          fontSize: 38,
+          fontWeight: 800,
+          color: "#fff",
+          margin: "0 0 10px 0",
+          textTransform: "uppercase",
+        }}>
+          Меню <span style={{ color: "#e53935" }}>фуршетов</span>
+        </h2>
+        <p style={{
+          textAlign: "center",
+          color: "#888",
+          fontSize: 16,
+          margin: "0 0 40px 0",
+        }}>
+          Выберите категорию и добавьте блюда в корзину
+        </p>
+
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: 10,
+          marginBottom: 40,
+          flexWrap: "wrap",
+        }}>
+          {menuCategories.map((cat, i) => (
+            <button
+              key={cat.title}
+              onClick={() => setActiveCategory(i)}
+              style={{
+                padding: "10px 24px",
+                borderRadius: 25,
+                border: activeCategory === i ? "none" : "1px solid #444",
+                backgroundColor: activeCategory === i ? "#e53935" : "transparent",
+                color: activeCategory === i ? "#fff" : "#ccc",
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.3s",
+              }}
+            >
+              {cat.title}
+            </button>
+          ))}
+        </div>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          gap: 20,
+        }}>
+          {category.items.map((item) => (
+            <div key={item.name} style={{
+              backgroundColor: "#1a1a1a",
+              borderRadius: 12,
+              padding: 24,
+              border: "1px solid #2a2a2a",
+              transition: "transform 0.3s, border-color 0.3s",
+            }}>
+              <h3 style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#fff",
+                margin: "0 0 8px 0",
+              }}>
+                {item.name}
+              </h3>
+              <p style={{
+                fontSize: 14,
+                color: "#888",
+                margin: "0 0 15px 0",
+                lineHeight: 1.5,
+              }}>
+                {item.desc}
+              </p>
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}>
+                <span style={{
+                  fontSize: 20,
+                  fontWeight: 800,
+                  color: "#e53935",
+                }}>
+                  {item.price}
+                </span>
+                <button
+                  onClick={() => {
+                    const ex = cartItems.find((c) => c.name === item.name);
+                    if (ex) {
+                      setCartItems(cartItems.map((c) => c.name === item.name ? { ...c, quantity: c.quantity + 1 } : c));
+                    } else {
+                      setCartItems([...cartItems, { name: item.name, price: item.price, quantity: 1 }]);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: "#e53935",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 20,
+                    padding: "8px 18px",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "background-color 0.3s",
+                  }}
+                >
+                  + В корзину
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 /* ============================================
@@ -1083,12 +1134,22 @@ export default function Home() {
     <main>
       <Nav cartItems={cartItems} onOpenCart={() => setCartOpen(true)} />
       <Hero />
+      <main>
+      <Nav cartItems={cartItems} onOpenCart={() => setCartOpen(true)} />
+      <Hero />
       <MenuSection cartItems={cartItems} setCartItems={setCartItems} />
       <RecipesSection />
       <AboutSection />
       <ContactsSection />
       <Footer />
       <CartModal cartItems={cartItems} setCartItems={setCartItems} isOpen={cartOpen} onClose={() => setCartOpen(false)} />
-    </main>
+      </main>
+  );
+      <RecipesSection />
+      <AboutSection />
+      <ContactsSection />
+      <Footer />
+      <CartModal cartItems={cartItems} setCartItems={setCartItems} isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      </main>
   );
 }

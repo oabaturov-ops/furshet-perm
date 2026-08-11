@@ -1,0 +1,82 @@
+{
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Канапе",
+      "slug": "cold-snacks",
+      "sortOrder": 4
+    },
+    {
+      "id": "cat-2",
+      "name": "Кростини и Брускетты",
+      "slug": "hot-snacks",
+      "sortOrder": 2
+    },
+    {
+      "id": "msma9gjt1luptj",
+      "name": "Салаты",
+      "description": "",
+      "sortOrder": 1
+    },
+    {
+      "id": "msoi1vufbbht6j",
+      "name": "Набор из блинов",
+      "description": "",
+      "sortOrder": 3
+    },
+    {
+      "id": "msoi2w5pw3cv1p",
+      "name": "Наборы микс",
+      "description": "",
+      "sortOrder": 5
+    }
+  ],
+  "dishes": [
+    {
+      "id": "dish-1",
+      "categoryId": "msma9gjt1luptj",
+      "name": "Сет салатов",
+      "description": "Наши любимые и всем знакомые с детства\n- оливье 4 шт.",
+      "price": 4100,
+      "image": "/images/dishes/1786308638136-w6x7cn.jpg",
+      "sortOrder": 1,
+      "composition": []
+    },
+    {
+      "id": "dish-2",
+      "categoryId": "msma9gjt1luptj",
+      "name": "Оливье с говядиной",
+      "description": "Картофель, морковь, яйцо, консервированный горошек, солёные огурцы, майонез, говядина и перепелиное яйцо.",
+      "price": 320,
+      "image": "/images/dishes/1786346982400-zhnp1d.jpg",
+      "sortOrder": 2,
+      "composition": [
+        {
+          "id": "ci-1786347095829",
+          "name": "Картофель",
+          "quantity": "1"
+        },
+        {
+          "id": "ci-1786347112042",
+          "name": "Морковь",
+          "quantity": "1"
+        },
+        {
+          "id": "ci-1786347128605",
+          "name": "Яйцо",
+          "quantity": "1"
+        },
+        {
+          "id": "ci-1786347152349",
+          "name": "Консервированный горошек",
+          "quantity": "1"
+        },
+        {
+          "id": "ci-1786347172945",
+          "name": "Солёные огурцы",
+          "quantity": ""
+        }
+      ]
+    }
+  ]
+}
