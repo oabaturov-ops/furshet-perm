@@ -704,7 +704,7 @@ function ContactsSection() {
                 { icon: "📞", label: "Телефон", value: "+7 (902) 809 2149", href: "tel:+7 (902) 809 2149" },
                 //{ icon: "💬", label: "WhatsApp", value: "+7 900 000-00-00", href: "https://wa.me/79000000000" },
                 //{ icon: "✈️", label: "Telegram", value: "@furshet_perm", href: "https://t.me/furshet_perm" },
-                { icon: "📧", label: "Email", value: "info@furshet-perm.ru", href: "mailto:furshetperm159@yandex.ru" },
+                { icon: "📧", label: "Email", value: "furshetperm159@yandex.ru", href: "mailto:furshetperm159@yandex.ru" },
               ].map((contact) => (
                 <a
                   key={contact.label}
@@ -754,9 +754,8 @@ function ContactsSection() {
                 lineHeight: 1.6,
                 margin: 0,
               }}>
-                г. Пермь, ул. Примерная, д. 1<br />
-                (здесь будет реальный адрес)
-              </p>
+                г. Пермь, проспект Парковый, д. 3<br />
+                 </p>
             </div>
           </div>
 
@@ -1134,22 +1133,12 @@ export default function Home() {
     <main>
       <Nav cartItems={cartItems} onOpenCart={() => setCartOpen(true)} />
       <Hero />
-      <main>
-      <Nav cartItems={cartItems} onOpenCart={() => setCartOpen(true)} />
-      <Hero />
       <MenuSection cartItems={cartItems} setCartItems={setCartItems} />
       <RecipesSection />
       <AboutSection />
       <ContactsSection />
       <Footer />
       <CartModal cartItems={cartItems} setCartItems={setCartItems} isOpen={cartOpen} onClose={() => setCartOpen(false)} />
-      </main>
-  );
-      <RecipesSection />
-      <AboutSection />
-      <ContactsSection />
-      <Footer />
-      <CartModal cartItems={cartItems} setCartItems={setCartItems} isOpen={cartOpen} onClose={() => setCartOpen(false)} />
-      </main>
+    </main>
   );
 }
