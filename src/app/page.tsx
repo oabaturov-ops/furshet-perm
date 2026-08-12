@@ -180,6 +180,14 @@ function Nav({ cartItems, onOpenCart }: { cartItems: CartItem[]; onOpenCart: () 
    ============================================ */
 function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -193,8 +201,8 @@ function Hero() {
       id="home"
       style={{
         position: "relative",
-        height: "100vh",
-        minHeight: 600,
+        height: isMobile ? "100svh" : "100vh",
+        minHeight: isMobile ? 500 : 600,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -202,7 +210,6 @@ function Hero() {
         overflow: "hidden",
       }}
     >
-      {/* Карусель фото с параллаксом */}
       {heroImages.map((img, i) => (
         <div
           key={img}
@@ -212,14 +219,13 @@ function Hero() {
             backgroundImage: `url('${img}')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            backgroundAttachment: "fixed",
+            backgroundAttachment: isMobile ? "scroll" : "fixed",
             opacity: currentSlide === i ? 1 : 0,
             transition: "opacity 1.5s ease-in-out",
           }}
         />
       ))}
 
-      {/* Тёмный оверлей */}
       <div style={{
         position: "absolute",
         inset: 0,
@@ -227,15 +233,14 @@ function Hero() {
         zIndex: 1,
       }} />
 
-      {/* Контент */}
       <div style={{
         position: "relative",
         zIndex: 2,
         maxWidth: 800,
-        padding: "0 20px",
+        padding: isMobile ? "0 16px" : "0 20px",
       }}>
         <h1 style={{
-          fontSize: 52,
+          fontSize: isMobile ? 28 : 52,
           fontWeight: 800,
           color: "#fff",
           margin: 0,
@@ -246,9 +251,9 @@ function Hero() {
           <br />в Перми
         </h1>
         <p style={{
-          fontSize: 20,
+          fontSize: isMobile ? 14 : 20,
           color: "#ccc",
-          marginTop: 20,
+          marginTop: isMobile ? 12 : 20,
           lineHeight: 1.6,
           maxWidth: 600,
           marginLeft: "auto",
@@ -257,15 +262,15 @@ function Hero() {
           Создаём незабываемые впечатления для ваших мероприятий.
           Высокая кухня, безупречный сервис и внимание к каждой детали.
         </p>
-        <div style={{ marginTop: 35, display: "flex", gap: 15, justifyContent: "center", flexWrap: "wrap" }}>
+        <div style={{ marginTop: isMobile ? 20 : 35, display: "flex", gap: isMobile ? 10 : 15, justifyContent: "center", flexWrap: "wrap" }}>
           <a href="#menu" style={{
             display: "inline-block",
             backgroundColor: "#e53935",
             color: "#fff",
             textDecoration: "none",
-            padding: "14px 35px",
+            padding: isMobile ? "10px 20px" : "14px 35px",
             borderRadius: 30,
-            fontSize: 16,
+            fontSize: isMobile ? 13 : 16,
             fontWeight: 600,
           }}>
             Смотреть меню
@@ -275,9 +280,9 @@ function Hero() {
             border: "2px solid #e53935",
             color: "#e53935",
             textDecoration: "none",
-            padding: "14px 35px",
+            padding: isMobile ? "10px 20px" : "14px 35px",
             borderRadius: 30,
-            fontSize: 16,
+            fontSize: isMobile ? 13 : 16,
             fontWeight: 600,
           }}>
             Заказать фуршет
@@ -285,10 +290,9 @@ function Hero() {
         </div>
       </div>
 
-      {/* Точки-индикаторы карусели */}
       <div style={{
         position: "absolute",
-        bottom: 40,
+        bottom: isMobile ? 20 : 40,
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 2,
@@ -312,7 +316,6 @@ function Hero() {
         ))}
       </div>
 
-      {/* Красная полоса снизу */}
       <div style={{
         position: "absolute",
         bottom: 0,
