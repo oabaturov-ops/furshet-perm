@@ -1,28 +1,141 @@
-import fs from 'fs'
-import path from 'path'
+import { supabase } from './supabase'
 
 export interface CompositionItem { name: string; amount: string }
 
 export interface Dish {
-  id: string; name: string; description: string; price: number
-  image: string | null; sortOrder: number; categoryId: string
+  id: string
+  name: string
+  description: string
+  price: number
+  image: string | null
+  sortOrder: number
+  categoryId: string
   composition: CompositionItem[]
 }
 
-export interface Category { id: string; name: string; slug: string; sortOrder: number }
-
-export interface MenuData { categories: Category[]; dishes: Dish[] }
-
-const DATA_PATH = path.join(process.cwd(), 'src', 'data', 'menu.json')
-
-export function readMenu(): MenuData {
-  const raw = fs.readFileSync(DATA_PATH, 'utf-8').replace(/^\uFEFF/, '')
-  return JSON.parse(raw)
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  sortOrder: number
 }
 
-export function writeMenu(data: MenuData): void {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), 'utf-8')
+// ---- Categories ----
+
+export async function getCategories(): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('sort_order', { ascending: true })
+  if (error) throw error
+  return (data ?? []).map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug ?? '',
+    sortOrder: c.sort_order ?? 0,
+  }))
 }
+
+export async function createCategory(name: string): Promise<Category> {
+  const slug = slugify(name)
+  const { data, error } = await supabase
+    .from('categories')
+    .insert({ name, slug })
+    .select()
+    .single()
+  if (error) throw error
+  return { id: data.id, name: data.name, slug: data.slug ?? '', sortOrder: data.sort_order ?? 0 }
+}
+
+export async function updateCategory(id: string, name: string): Promise<void> {
+  const slug = slugify(name)
+  const { error } = await supabase
+    .from('categories')
+    .update({ name, slug })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+}
+
+// ---- Dishes ----
+
+export async function getDishes(): Promise<Dish[]> {
+  const { data, error } = await supabase
+    .from('dishes')
+    .select('*')
+    .order('sort_order', { ascending: true })
+  if (error) throw error
+  return (data ?? []).map((d: any) => ({
+    id: d.id,
+    name: d.name,
+    description: d.description ?? '',
+    price: d.price ?? 0,
+    image: d.image,
+    sortOrder: d.sort_order ?? 0,
+    categoryId: d.category_id,
+    composition: d.composition ?? [],
+  }))
+}
+
+export async function createDish(dish: Omit<Dish, 'id'>): Promise<Dish> {
+  const { data, error } = await supabase
+    .from('dishes')
+    .insert({
+      name: dish.name,
+      description: dish.description,
+      price: dish.price,
+      image: dish.image,
+      sort_order: dish.sortOrder,
+      category_id: dish.categoryId,
+      composition: dish.composition,
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description ?? '',
+    price: data.price ?? 0,
+    image: data.image,
+    sortOrder: data.sort_order ?? 0,
+    categoryId: data.category_id,
+    composition: data.composition ?? [],
+  }
+}
+
+export async function updateDish(id: string, dish: Partial<Dish>): Promise<void> {
+  const { error } = await supabase
+    .from('dishes')
+    .update({
+      name: dish.name,
+      description: dish.description,
+      price: dish.price,
+      image: dish.image,
+      sort_order: dish.sortOrder,
+      category_id: dish.categoryId,
+      composition: dish.composition,
+    })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteDish(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('dishes')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+}
+
+// ---- Helpers ----
 
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)

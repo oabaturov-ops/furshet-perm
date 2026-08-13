@@ -1,21 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readMenu, writeMenu } from '@/lib/menu-store';
+import { NextRequest, NextResponse } from 'next/server'
+import { updateCategory, deleteCategory } from '@/lib/menu-store'
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const menu = readMenu();
-  const index = menu.categories.findIndex(c => c.id === id);
-  if (index === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  const body = await request.json();
-  menu.categories[index] = { ...menu.categories[index], ...body };
-  writeMenu(menu);
-  return NextResponse.json(menu.categories[index]);
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  try {
+    const body = await req.json()
+    await updateCategory(id, body.name)
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const menu = readMenu();
-  menu.categories = menu.categories.filter(c => c.id !== id);
-  writeMenu(menu);
-  return NextResponse.json({ success: true });
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  try {
+    await deleteCategory(id)
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }

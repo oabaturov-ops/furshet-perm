@@ -1,21 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readMenu, writeMenu } from '@/lib/menu-store';
+import { NextRequest, NextResponse } from 'next/server'
+import { updateDish, deleteDish } from '@/lib/menu-store'
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const menu = readMenu();
-  const index = menu.dishes.findIndex(d => d.id === id);
-  if (index === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  const body = await request.json();
-  menu.dishes[index] = { ...menu.dishes[index], ...body };
-  writeMenu(menu);
-  return NextResponse.json(menu.dishes[index]);
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  try {
+    const body = await req.json()
+    await updateDish(id, body)
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const menu = readMenu();
-  menu.dishes = menu.dishes.filter(d => d.id !== id);
-  writeMenu(menu);
-  return NextResponse.json({ success: true });
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  try {
+    await deleteDish(id)
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }

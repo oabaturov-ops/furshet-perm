@@ -1,16 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readMenu, writeMenu, generateId } from '@/lib/menu-store';
+import { NextRequest, NextResponse } from 'next/server'
+import { getCategories, createCategory } from '@/lib/menu-store'
 
 export async function GET() {
-  const menu = readMenu();
-  return NextResponse.json(menu.categories);
+  try {
+    const categories = await getCategories()
+    return NextResponse.json(categories)
+  } catch (e: any) {
+    console.error('GET categories error:', e)
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const menu = readMenu();
-  const newCat = { id: generateId(), ...body };
-  menu.categories.push(newCat);
-  writeMenu(menu);
-  return NextResponse.json(newCat, { status: 201 });
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const category = await createCategory(body.name)
+    return NextResponse.json(category, { status: 201 })
+  } catch (e: any) {
+    console.error('POST categories error:', e)
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }

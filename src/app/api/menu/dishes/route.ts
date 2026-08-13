@@ -1,16 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readMenu, writeMenu, generateId } from '@/lib/menu-store';
+import { NextRequest, NextResponse } from 'next/server'
+import { getDishes, createDish } from '@/lib/menu-store'
 
 export async function GET() {
-  const menu = readMenu();
-  return NextResponse.json(menu.dishes);
+  try {
+    const dishes = await getDishes()
+    return NextResponse.json(dishes)
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const menu = readMenu();
-  const newDish = { id: generateId(), ...body };
-  menu.dishes.push(newDish);
-  writeMenu(menu);
-  return NextResponse.json(newDish, { status: 201 });
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const dish = await createDish(body)
+    return NextResponse.json(dish, { status: 201 })
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }
