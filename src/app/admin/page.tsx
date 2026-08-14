@@ -35,7 +35,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'dishes' | 'categories'>('dishes');
+  const [activeTab, setActiveTab] = useState<'dishes' | 'categories' | 'orders'>('dishes');
   const [menuData, setMenuData] = useState<MenuData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDishModal, setShowDishModal] = useState(false);
@@ -46,6 +46,7 @@ export default function AdminPage() {
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedImage, setUploadedImage] = useState('');
+  const [orders, setOrders] = useState<any[]>([]);
 
   // Dish form state
   const [dishForm, setDishForm] = useState({
@@ -81,6 +82,8 @@ export default function AdminPage() {
         const dishes = await dishRes.json();
         setMenuData({ categories, dishes });
       }
+      const orderRes = await fetch('/api/orders');
+      if (orderRes.ok) setOrders(await orderRes.json());
     } catch (err) {
       console.error('Failed to fetch menu:', err);
     } finally {
@@ -93,6 +96,18 @@ export default function AdminPage() {
       fetchMenu();
     }
   }, [isAuthenticated, fetchMenu]);
+    useEffect(() => {
+    if (!isAuthenticated) return;
+    const interval = setInterval(() => {
+      fetch('/api/orders').then(r => r.json()).then(newOrders => {
+        const prevNew = orders.filter(o => o.status === 'new').length;
+        const currNew = newOrders.filter((o: any) => o.status === 'new').length;
+        if (currNew > prevNew) showNotification('success', `Новый заказ! (${currNew} новых)`);
+        setOrders(newOrders);
+      });
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, orders, showNotification]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -362,6 +377,17 @@ export default function AdminPage() {
           >
             Категории
           </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'orders'
+                ? 'text-white'
+                : 'bg-[#1a1a1a] text-gray-400 hover:text-white'
+            }`}
+            style={activeTab === 'orders' ? { backgroundColor: '#e53935' } : {}}
+          >
+            Заказы {orders.length > 0 && `(${orders.filter(o => o.status === 'new').length})`}
+          </button>
         </div>
 
         {loading ? (
@@ -442,7 +468,7 @@ export default function AdminPage() {
               </table>
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'categories' ? (
           /* ===== CATEGORIES TAB ===== */
           <div>
             <div className="flex justify-between items-center mb-4">
@@ -494,6 +520,61 @@ export default function AdminPage() {
               )}
             </div>
           </div>
+        ) : (
+          /* ===== ORDERS TAB ===== */
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Заказы</h2>
+            {!orders.length ? (
+              <p className="text-gray-500 text-center py-12">Заказов пока нет</p>
+            ) : (
+              <div className="space-y-4">
+                {orders.map((o: any) => (
+                  <div key={o.id} className="bg-[#1a1a1a] rounded-xl border border-gray-800 p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <span className="font-medium">{o.customer_name}</span>
+                        <span className="text-gray-400 text-sm ml-3">{o.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">{new Date(o.created_at).toLocaleString('ru-RU')}</span>
+                        <select
+                          value={o.status}
+                          onChange={async (e) => {
+                            await fetch(`/api/orders/${o.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: e.target.value }) });
+                            fetchMenu();
+                          }}
+                          className="bg-[#333] text-white text-xs rounded-lg px-2 py-1 border border-gray-700"
+                        >
+                          <option value="new">Новый</option>
+                          <option value="cooking">Готовится</option>
+                          <option value="delivery">Доставка</option>
+                          <option value="done">Выполнен</option>
+                        </select>
+                        <button
+                          onClick={async () => {
+                            if (confirm('Удалить заказ?')) {
+                              await fetch(`/api/orders/${o.id}`, { method: 'DELETE' });
+                              fetchMenu();
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-300 text-xs ml-2"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                    {o.address && <p className="text-gray-400 text-sm mb-2">Адрес: {o.address}</p>}
+                    <div className="text-sm text-gray-300 mb-1">
+                      {o.items?.map((it: any, i: number) => (
+                        <span key={i}>{it.name} x{it.quantity} — {it.price * it.quantity} ₽; </span>
+                      ))}
+                    </div>
+                    <div className="text-right font-bold text-lg" style={{ color: '#e53935' }}>{o.total} ₽</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -506,7 +587,6 @@ export default function AdminPage() {
               <button onClick={() => setShowDishModal(false)} className="text-gray-400 hover:text-white text-xl">&times;</button>
             </div>
             <div className="p-6 space-y-4">
-              {/* Image upload */}
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Фото блюда</label>
                 {uploadedImage && (
@@ -528,7 +608,6 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              {/* Name */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Название *</label>
                 <input
@@ -539,7 +618,6 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Описание</label>
                 <textarea
@@ -550,7 +628,6 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Price + Category row */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-1">Цена (руб) *</label>
@@ -577,7 +654,6 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Sort order */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Порядок сортировки</label>
                 <input
@@ -589,7 +665,6 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Composition */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm text-gray-400">Состав блюда</label>
@@ -630,7 +705,6 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Modal footer */}
             <div className="px-6 py-4 border-t border-gray-800 flex justify-end gap-3">
               <button
                 onClick={() => setShowDishModal(false)}

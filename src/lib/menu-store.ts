@@ -135,6 +135,84 @@ export async function deleteDish(id: string): Promise<void> {
   if (error) throw error
 }
 
+// ---- Orders ----
+
+export interface OrderItem {
+  name: string
+  price: number
+  quantity: number
+}
+
+export interface Order {
+  id: string
+  customer_name: string
+  phone: string
+  address: string
+  items: OrderItem[]
+  total: number
+  status: string
+  created_at: string
+}
+
+export async function getOrders(): Promise<Order[]> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []).map((o: any) => ({
+    id: o.id,
+    customer_name: o.customer_name,
+    phone: o.phone,
+    address: o.address ?? '',
+    items: o.items ?? [],
+    total: Number(o.total) ?? 0,
+    status: o.status ?? 'new',
+    created_at: o.created_at,
+  }))
+}
+
+export async function createOrder(order: {
+  customer_name: string
+  phone: string
+  address: string
+  items: OrderItem[]
+  total: number
+}): Promise<Order> {
+  const { data, error } = await supabase
+    .from('orders')
+    .insert(order)
+    .select()
+    .single()
+  if (error) throw error
+  return {
+    id: data.id,
+    customer_name: data.customer_name,
+    phone: data.phone,
+    address: data.address ?? '',
+    items: data.items ?? [],
+    total: Number(data.total) ?? 0,
+    status: data.status ?? 'new',
+    created_at: data.created_at,
+  }
+}
+
+export async function updateOrderStatus(id: string, status: string): Promise<void> {
+  const { error } = await supabase
+    .from('orders')
+    .update({ status })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteOrder(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('orders')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+}
+
 // ---- Helpers ----
 
 export function generateId(): string {

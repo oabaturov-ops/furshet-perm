@@ -924,9 +924,10 @@ function CartModal({ cartItems, setCartItems, isOpen, onClose }: { cartItems: Ca
 }
 
 function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>> }) {
-  const [menuCategories, setMenuCategories] = useState<{title: string, items: {name: string, desc: string, price: string}[]}[]>([]);
+  const [menuCategories, setMenuCategories] = useState<{title: string, items: {name: string, desc: string, price: string, priceNum: number, image: string | null, composition: any[]}[]}[]>([]);
   const [activeCategory, setActiveCategory] = useState(0);
   const [menuLoading, setMenuLoading] = useState(true);
+  const [selectedDish, setSelectedDish] = useState<{name: string, desc: string, price: string, image: string | null, composition: any[]} | null>(null);
 
   useEffect(() => {
     async function loadMenu() {
@@ -949,6 +950,9 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
                 name: d.name,
                 desc: d.description,
                 price: d.price + ' \u20BD',
+                priceNum: d.price,
+                image: d.image || null,
+                composition: d.composition || [],
               })),
           }))
           .filter((cat: any) => cat.items.length > 0);
@@ -981,51 +985,26 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
   const category = menuCategories[activeCategory];
 
   return (
-    <section id="menu" style={{
-      padding: "80px 20px",
-      backgroundColor: "#0a0a0a",
-    }}>
+    <section id="menu" style={{ padding: "80px 20px", backgroundColor: "#0a0a0a" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <h2 style={{
-          textAlign: "center",
-          fontSize: 38,
-          fontWeight: 800,
-          color: "#fff",
-          margin: "0 0 10px 0",
-          textTransform: "uppercase",
-        }}>
+        <h2 style={{ textAlign: "center", fontSize: 38, fontWeight: 800, color: "#fff", margin: "0 0 10px 0", textTransform: "uppercase" }}>
           Меню <span style={{ color: "#e53935" }}>фуршетов</span>
         </h2>
-        <p style={{
-          textAlign: "center",
-          color: "#888",
-          fontSize: 16,
-          margin: "0 0 40px 0",
-        }}>
+        <p style={{ textAlign: "center", color: "#888", fontSize: 16, margin: "0 0 40px 0" }}>
           Выберите категорию и добавьте блюда в корзину
         </p>
 
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 10,
-          marginBottom: 40,
-          flexWrap: "wrap",
-        }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 40, flexWrap: "wrap" }}>
           {menuCategories.map((cat, i) => (
             <button
               key={cat.title}
               onClick={() => setActiveCategory(i)}
               style={{
-                padding: "10px 24px",
-                borderRadius: 25,
+                padding: "10px 24px", borderRadius: 25,
                 border: activeCategory === i ? "none" : "1px solid #444",
                 backgroundColor: activeCategory === i ? "#e53935" : "transparent",
                 color: activeCategory === i ? "#fff" : "#ccc",
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "all 0.3s",
+                fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.3s",
               }}
             >
               {cat.title}
@@ -1033,75 +1012,129 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
           ))}
         </div>
 
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-          gap: 20,
-        }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 20 }}>
           {category.items.map((item) => (
-            <div key={item.name} style={{
-              backgroundColor: "#1a1a1a",
-              borderRadius: 12,
-              padding: 24,
-              border: "1px solid #2a2a2a",
-              transition: "transform 0.3s, border-color 0.3s",
-            }}>
-              <h3 style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: "#fff",
-                margin: "0 0 8px 0",
-              }}>
-                {item.name}
+            <div
+              key={item.name}
+              onClick={() => setSelectedDish(item)}
+              style={{
+                backgroundColor: "#1a1a1a", borderRadius: 12,
+                border: "1px solid #2a2a2a", transition: "transform 0.3s, border-color 0.3s",
+                cursor: "pointer", overflow: "hidden",
+              }}
+            >
+              {item.image && (
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  style={{ width: "100%", height: 180, objectFit: "cover" }}
+                />
+              )}
+              <div style={{ padding: 24 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#fff", margin: "0 0 8px 0" }}>
+                  {item.name}
+                </h3>
+                <p style={{ fontSize: 14, color: "#888", margin: "0 0 15px 0", lineHeight: 1.5 }}>
+                  {item.desc}
+                </p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 20, fontWeight: 800, color: "#e53935" }}>{item.price}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const ex = cartItems.find((c) => c.name === item.name);
+                      if (ex) {
+                        setCartItems(cartItems.map((c) => c.name === item.name ? { ...c, quantity: c.quantity + 1 } : c));
+                      } else {
+                        setCartItems([...cartItems, { name: item.name, price: item.price, quantity: 1 }]);
+                      }
+                    }}
+                    style={{
+                      backgroundColor: "#e53935", color: "#fff", border: "none",
+                      borderRadius: 20, padding: "8px 18px", fontSize: 13,
+                      fontWeight: 600, cursor: "pointer", transition: "background-color 0.3s",
+                    }}
+                  >
+                    + В корзину
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Модальное окно блюда */}
+      {selectedDish && (
+        <div
+          onClick={() => setSelectedDish(null)}
+          style={{
+            position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.8)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 1000, padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#1a1a1a", borderRadius: 16, maxWidth: 500,
+              width: "100%", maxHeight: "90vh", overflowY: "auto",
+              border: "1px solid #333",
+            }}
+          >
+            {selectedDish.image && (
+              <img
+                src={selectedDish.image}
+                alt={selectedDish.name}
+                style={{ width: "100%", height: 250, objectFit: "cover", borderRadius: "16px 16px 0 0" }}
+              />
+            )}
+            <div style={{ padding: 24 }}>
+              <h3 style={{ fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 0 10px 0" }}>
+                {selectedDish.name}
               </h3>
-              <p style={{
-                fontSize: 14,
-                color: "#888",
-                margin: "0 0 15px 0",
-                lineHeight: 1.5,
-              }}>
-                {item.desc}
+              <p style={{ fontSize: 15, color: "#aaa", margin: "0 0 16px 0", lineHeight: 1.6 }}>
+                {selectedDish.desc}
               </p>
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}>
-                <span style={{
-                  fontSize: 20,
-                  fontWeight: 800,
-                  color: "#e53935",
-                }}>
-                  {item.price}
-                </span>
+              {selectedDish.composition.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <h4 style={{ fontSize: 16, fontWeight: 600, color: "#e53935", margin: "0 0 10px 0" }}>Состав:</h4>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {selectedDish.composition.map((c: any, i: number) => (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", color: "#ccc", fontSize: 14 }}>
+                        <span>{c.name}</span>
+                        <span style={{ color: "#888" }}>{c.quantity || c.amount}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
+                <span style={{ fontSize: 24, fontWeight: 800, color: "#e53935" }}>{selectedDish.price}</span>
                 <button
                   onClick={() => {
+                    const item = selectedDish;
                     const ex = cartItems.find((c) => c.name === item.name);
                     if (ex) {
                       setCartItems(cartItems.map((c) => c.name === item.name ? { ...c, quantity: c.quantity + 1 } : c));
                     } else {
                       setCartItems([...cartItems, { name: item.name, price: item.price, quantity: 1 }]);
                     }
+                    setSelectedDish(null);
                   }}
                   style={{
-                    backgroundColor: "#e53935",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 20,
-                    padding: "8px 18px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "background-color 0.3s",
+                    backgroundColor: "#e53935", color: "#fff", border: "none",
+                    borderRadius: 20, padding: "12px 24px", fontSize: 15,
+                    fontWeight: 600, cursor: "pointer",
                   }}
                 >
                   + В корзину
                 </button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }
