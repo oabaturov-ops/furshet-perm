@@ -1198,6 +1198,102 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
 /* ============================================
    FOOTER — временный заглушка (позже расширим)
    ============================================ */
+   /* ============================================
+   COMMENTS — Отзывы
+   ============================================ */
+function CommentsSection() {
+  const [comments, setComments] = useState<{ id: string; name: string; text: string; created_at: string }[]>([]);
+  const [name, setName] = useState('');
+  const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/comments')
+      .then(res => res.json())
+      .then(data => setComments(data || []))
+      .catch(() => {});
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!name.trim() || !text.trim()) return;
+    setSending(true);
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), text: text.trim() }),
+      });
+      if (res.ok) {
+        const newComment = await res.json();
+        setComments([newComment, ...comments]);
+        setName('');
+        setText('');
+      }
+    } catch {}
+    setSending(false);
+  };
+
+  return (
+    <section id="comments" style={{ padding: "80px 20px", backgroundColor: "#0a0a0a" }}>
+      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+        <h2 style={{ textAlign: "center", fontSize: 38, fontWeight: 800, color: "#fff", margin: "0 0 10px 0", textTransform: "uppercase" }}>
+          Отзывы
+        </h2>
+        <p style={{ textAlign: "center", color: "#888", fontSize: 16, margin: "0 0 40px 0" }}>
+          Поделитесь впечатлениями о нашем обслуживании
+        </p>
+
+        {/* Форма */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 40 }}>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ваше имя"
+            style={{ width: "100%", padding: "12px 16px", backgroundColor: "#111", border: "1px solid #333", borderRadius: 8, color: "#fff", fontSize: 15, boxSizing: "border-box" }}
+          />
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Ваш отзыв"
+            rows={3}
+            style={{ width: "100%", padding: "12px 16px", backgroundColor: "#111", border: "1px solid #333", borderRadius: 8, color: "#fff", fontSize: 15, boxSizing: "border-box", resize: "vertical" }}
+          />
+          <button
+            onClick={handleSubmit}
+            disabled={sending || !name.trim() || !text.trim()}
+            style={{
+              alignSelf: "flex-end", padding: "12px 30px",
+              backgroundColor: (sending || !name.trim() || !text.trim()) ? "#555" : "#e53935",
+              color: "#fff", border: "none", borderRadius: 8, fontSize: 15,
+              fontWeight: 600, cursor: (sending || !name.trim() || !text.trim()) ? "not-allowed" : "pointer",
+            }}
+          >
+            {sending ? "Отправка..." : "Отправить отзыв"}
+          </button>
+        </div>
+
+        {/* Список отзывов */}
+        {comments.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#666", fontSize: 15 }}>Пока нет отзывов. Будьте первым!</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {comments.map((c) => (
+              <div key={c.id} style={{ backgroundColor: "#1a1a1a", borderRadius: 12, border: "1px solid #2a2a2a", padding: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <span style={{ fontWeight: 700, color: "#fff", fontSize: 16 }}>{c.name}</span>
+                  <span style={{ color: "#666", fontSize: 13 }}>
+                    {new Date(c.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </span>
+                </div>
+                <p style={{ color: "#ccc", fontSize: 15, margin: 0, lineHeight: 1.6 }}>{c.text}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
 function Footer() {
   return (
     <footer style={{
@@ -1230,6 +1326,7 @@ export default function Home() {
       <RecipesSection />
       <AboutSection />
       <ContactsSection />
+      <CommentsSection />
       <Footer />
       <CartModal cartItems={cartItems} setCartItems={setCartItems} isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </main>
