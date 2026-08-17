@@ -15,6 +15,7 @@ interface Dish {
   price: number;
   categoryId: string;
   image: string;
+  image2: string;
   sortOrder: number;
   composition: CompositionItem[];
 }
@@ -46,6 +47,8 @@ export default function AdminPage() {
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedImage, setUploadedImage] = useState('');
+  const [uploadedImage2, setUploadedImage2] = useState('');
+  const fileInputRef2 = useRef<HTMLInputElement>(null);
   const [orders, setOrders] = useState<any[]>([]);
 
   // Dish form state
@@ -55,6 +58,7 @@ export default function AdminPage() {
     price: '',
     categoryId: '',
     image: '',
+    image2: '',
     sortOrder: '0',
   });
   const [composition, setComposition] = useState<CompositionItem[]>([]);
@@ -128,7 +132,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const formData = new FormData();
@@ -143,6 +147,26 @@ export default function AdminPage() {
         setUploadedImage(data.url);
         setDishForm((prev) => ({ ...prev, image: data.url }));
         showNotification('success', 'Фото загружено');
+      } else {
+        showNotification('error', 'Ошибка загрузки фото');
+      }
+    } catch {
+      showNotification('error', 'Ошибка загрузки фото');
+    }
+  };
+
+  const handleImageUpload2 = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/menu/upload', { method: 'POST', body: formData });
+      if (res.ok) {
+        const data = await res.json();
+        setUploadedImage2(data.url);
+        setDishForm((prev) => ({ ...prev, image2: data.url }));
+        showNotification('success', 'Второе фото загружено');
       } else {
         showNotification('error', 'Ошибка загрузки фото');
       }
@@ -168,7 +192,7 @@ export default function AdminPage() {
     );
   };
 
-  const openDishModal = (dish?: Dish) => {
+    const openDishModal = (dish?: Dish) => {
     if (dish) {
       setEditingDish(dish);
       setDishForm({
@@ -177,15 +201,18 @@ export default function AdminPage() {
         price: String(dish.price),
         categoryId: dish.categoryId,
         image: dish.image || '',
+        image2: (dish as any).image2 || '',
         sortOrder: String(dish.sortOrder),
       });
       setComposition(dish.composition || []);
       setUploadedImage(dish.image || '');
+      setUploadedImage2((dish as any).image2 || '');
     } else {
       setEditingDish(null);
-      setDishForm({ name: '', description: '', price: '', categoryId: menuData?.categories[0]?.id || '', image: '', sortOrder: '0' });
+      setDishForm({ name: '', description: '', price: '', categoryId: menuData?.categories[0]?.id || '', image: '', image2: '', sortOrder: '0' });
       setComposition([]);
       setUploadedImage('');
+      setUploadedImage2('');
     }
     setShowDishModal(true);
   };
@@ -605,6 +632,27 @@ export default function AdminPage() {
                   className="w-full py-2 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-gray-400 transition-colors"
                 >
                   {uploadedImage ? 'Заменить фото' : 'Загрузить фото'}
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Второе фото блюда</label>
+                {uploadedImage2 && (
+                  <img src={uploadedImage2} alt="Preview 2" className="w-full h-40 object-cover rounded-lg mb-2" />
+                )}
+                <input
+                  ref={fileInputRef2}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload2}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef2.current?.click()}
+                  className="w-full py-2 border border-dashed border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-gray-400 transition-colors"
+                >
+                  {uploadedImage2 ? 'Заменить второе фото' : 'Загрузить второе фото'}
                 </button>
               </div>
 

@@ -8,6 +8,7 @@ export interface Dish {
   description: string
   price: number
   image: string | null
+  image2: string | null
   sortOrder: number
   categoryId: string
   composition: CompositionItem[]
@@ -78,9 +79,11 @@ export async function getDishes(): Promise<Dish[]> {
     description: d.description ?? '',
     price: d.price ?? 0,
     image: d.image,
+    image2: d.image2,
     sortOrder: d.sort_order ?? 0,
     categoryId: d.category_id,
     composition: d.composition ?? [],
+    
   }))
 }
 
@@ -92,6 +95,7 @@ export async function createDish(dish: Omit<Dish, 'id'>): Promise<Dish> {
       description: dish.description,
       price: dish.price,
       image: dish.image,
+      image2: dish.image2,
       sort_order: dish.sortOrder,
       category_id: dish.categoryId,
       composition: dish.composition,
@@ -105,6 +109,7 @@ export async function createDish(dish: Omit<Dish, 'id'>): Promise<Dish> {
     description: data.description ?? '',
     price: data.price ?? 0,
     image: data.image,
+    image2: data.image2,
     sortOrder: data.sort_order ?? 0,
     categoryId: data.category_id,
     composition: data.composition ?? [],
@@ -119,6 +124,7 @@ export async function updateDish(id: string, dish: Partial<Dish>): Promise<void>
       description: dish.description,
       price: dish.price,
       image: dish.image,
+      image2: dish.image2,
       sort_order: dish.sortOrder,
       category_id: dish.categoryId,
       composition: dish.composition,

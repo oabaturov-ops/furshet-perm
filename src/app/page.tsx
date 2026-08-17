@@ -853,22 +853,83 @@ function ContactsSection() {
 function CartModal({ cartItems, setCartItems, isOpen, onClose }: { cartItems: CartItem[]; setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>>; isOpen: boolean; onClose: () => void }) {
   const total = cartItems.reduce((sum, item) => sum + parseInt(item.price.replace(/\D/g, "")) * item.quantity, 0);
   const [sending, setSending] = useState(false);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+
   if (!isOpen) return null;
+
+  const handleSubmit = async () => {
+    if (!name.trim() || !phone.trim()) {
+      alert('Укажите имя и телефон');
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch('/api/send-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          address: address,
+          items: cartItems.map(item => ({ name: item.name, price: item.price, quantity: item.quantity })),
+          total: total,
+        })
+      });
+      if (res.ok) {
+        setCartItems([]);
+        setName('');
+        setPhone('');
+        setAddress('');
+        onClose();
+      } else {
+        alert('Ошибка отправки заказа, позвоните нам');
+      }
+    } catch {
+      alert('Нет связи с сервером, позвоните нам');
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.7)" }} />
       <div style={{ position: "relative", backgroundColor: "#1a1a1a", borderRadius: 16, border: "1px solid #333", maxWidth: 500, width: "90%", maxHeight: "80vh", overflow: "auto", padding: 30 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 800, color: "#fff", margin: 0 }}>Корзина</h2>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: "#fff", margin: 0 }}>Оформление заказа</h2>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#888", fontSize: 28, cursor: "pointer" }}>X</button>
         </div>
+
+        {/* Контактные данные */}
+        <div style={{ marginBottom: 20 }}>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ваше имя *"
+            style={{ width: "100%", padding: "12px 16px", marginBottom: 10, backgroundColor: "#111", border: "1px solid #333", borderRadius: 8, color: "#fff", fontSize: 15, boxSizing: "border-box" }}
+          />
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Телефон *"
+            style={{ width: "100%", padding: "12px 16px", marginBottom: 10, backgroundColor: "#111", border: "1px solid #333", borderRadius: 8, color: "#fff", fontSize: 15, boxSizing: "border-box" }}
+          />
+          <input
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Адрес доставки (если нужно)"
+            style={{ width: "100%", padding: "12px 16px", backgroundColor: "#111", border: "1px solid #333", borderRadius: 8, color: "#fff", fontSize: 15, boxSizing: "border-box" }}
+          />
+        </div>
+
         {cartItems.length === 0 ? (
-          <p style={{ textAlign: "center", color: "#888", fontSize: 16, padding: "40px 0" }}>Корзина пуста</p>
+          <p style={{ textAlign: "center", color: "#888", fontSize: 16, padding: "20px 0" }}>Корзина пуста</p>
         ) : (
           <>
             {cartItems.map((item) => (
-              <div key={item.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid #222" }}>
+              <div key={item.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid #222" }}>
                 <div>
                   <div style={{ color: "#fff", fontWeight: 600, fontSize: 15 }}>{item.name}</div>
                   <div style={{ color: "#888", fontSize: 13 }}>{item.price} x {item.quantity}</div>
@@ -880,42 +941,17 @@ function CartModal({ cartItems, setCartItems, isOpen, onClose }: { cartItems: Ca
                 </div>
               </div>
             ))}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 0 0 0", borderTop: "2px solid #e53935", marginTop: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 0 0 0", borderTop: "2px solid #e53935", marginTop: 10 }}>
               <span style={{ color: "#fff", fontSize: 18, fontWeight: 700 }}>Итого:</span>
               <span style={{ color: "#e53935", fontSize: 24, fontWeight: 800 }}>{total} руб.</span>
             </div>
             <button
-  onClick={async () => {
-    setSending(true);
-    try {
-      const res = await fetch('/api/send-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerName: 'Онлайн-заказ',
-          customerPhone: 'Не указан',
-          items: cartItems.map(item => ({ name: item.name, price: item.price, quantity: item.quantity })),
-          totalPrice: total,
-          comment: ''
-        })
-      });
-      if (res.ok) {
-        setCartItems([]);
-        onClose();
-      } else {
-        alert('Ошибка отправки заказа, позвоните нам');
-      }
-    } catch {
-      alert('Нет связи с сервером, позвоните нам');
-    } finally {
-      setSending(false);
-    }
-  }}
-  disabled={sending}
-  style={{ width: "100%", marginTop: 20, padding: 14, backgroundColor: sending ? "#666" : "#e53935", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 700, cursor: sending ? "not-allowed" : "pointer" }}
->
-  {sending ? "Отправка..." : "Оформить заказ"}
-</button>
+              onClick={handleSubmit}
+              disabled={sending}
+              style={{ width: "100%", marginTop: 20, padding: 14, backgroundColor: sending ? "#666" : "#e53935", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 700, cursor: sending ? "not-allowed" : "pointer" }}
+            >
+              {sending ? "Отправка..." : "Оформить заказ"}
+            </button>
           </>
         )}
       </div>
@@ -927,7 +963,7 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
   const [menuCategories, setMenuCategories] = useState<{title: string, items: {name: string, desc: string, price: string, priceNum: number, image: string | null, composition: any[]}[]}[]>([]);
   const [activeCategory, setActiveCategory] = useState(0);
   const [menuLoading, setMenuLoading] = useState(true);
-  const [selectedDish, setSelectedDish] = useState<{name: string, desc: string, price: string, image: string | null, composition: any[]} | null>(null);
+  const [selectedDish, setSelectedDish] = useState<{name: string, desc: string, price: string, image: string | null, image2: string | null, composition: any[]} | null>(null);
 
   useEffect(() => {
     async function loadMenu() {
@@ -952,6 +988,7 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
                 price: d.price + ' \u20BD',
                 priceNum: d.price,
                 image: d.image || null,
+                image2: d.image2 || null,
                 composition: d.composition || [],
               })),
           }))
@@ -1023,13 +1060,24 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
                 cursor: "pointer", overflow: "hidden",
               }}
             >
-              {item.image && (
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  style={{ width: "100%", height: 180, objectFit: "cover" }}
-                />
-              )}
+              <div style={{ position: "relative" }}>
+                {item.image && (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    style={{ width: "100%", height: 180, objectFit: "cover" }}
+                  />
+                )}
+                {item.image2 && (
+                  <span style={{
+                    position: "absolute", top: 8, right: 8,
+                    backgroundColor: "rgba(0,0,0,0.7)", color: "#fff",
+                    fontSize: 11, padding: "3px 8px", borderRadius: 10,
+                  }}>
+                    2 фото
+                  </span>
+                )}
+              </div>
               <div style={{ padding: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 700, color: "#fff", margin: "0 0 8px 0" }}>
                   {item.name}
@@ -1082,13 +1130,22 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
               border: "1px solid #333",
             }}
           >
-            {selectedDish.image && (
-              <img
-                src={selectedDish.image}
-                alt={selectedDish.name}
-                style={{ width: "100%", height: 250, objectFit: "cover", borderRadius: "16px 16px 0 0" }}
-              />
-            )}
+            <div style={{ position: "relative" }}>
+              {selectedDish.image && (
+                <img
+                  src={selectedDish.image}
+                  alt={selectedDish.name}
+                  style={{ width: "100%", height: 250, objectFit: "cover", borderRadius: "16px 16px 0 0" }}
+                />
+              )}
+              {selectedDish.image2 && (
+                <img
+                  src={selectedDish.image2}
+                  alt={selectedDish.name}
+                  style={{ width: "100%", height: 200, objectFit: "cover", marginTop: 4 }}
+                />
+              )}
+            </div>
             <div style={{ padding: 24 }}>
               <h3 style={{ fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 0 10px 0" }}>
                 {selectedDish.name}
