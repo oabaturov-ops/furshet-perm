@@ -960,7 +960,7 @@ function CartModal({ cartItems, setCartItems, isOpen, onClose }: { cartItems: Ca
 }
 
 function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>> }) {
-  const [menuCategories, setMenuCategories] = useState<{title: string, items: {name: string, desc: string, price: string, priceNum: number, image: string | null, composition: any[]}[]}[]>([]);
+  const [menuCategories, setMenuCategories] = useState<{title: string, items: {name: string, desc: string, price: string, priceNum: number, image: string | null, image2: string | null, composition: any[]}[]}[]>([]);
   const [activeCategory, setActiveCategory] = useState(0);
   const [menuLoading, setMenuLoading] = useState(true);
   const [selectedDish, setSelectedDish] = useState<{name: string, desc: string, price: string, image: string | null, image2: string | null, composition: any[]} | null>(null);
