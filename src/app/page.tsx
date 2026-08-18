@@ -1294,19 +1294,121 @@ function CommentsSection() {
     </section>
   );
 }
+/* ============================================
+   FOOTER
+   ============================================ */
 function Footer() {
   return (
     <footer style={{
       backgroundColor: "#0a0a0a",
-      borderTop: "1px solid #333",
-      padding: "30px 20px",
-      textAlign: "center",
-      color: "#666",
-      fontSize: 14,
+      borderTop: "1px solid #222",
     }}>
-      <p style={{ margin: 0 }}>
+      <div style={{
+        maxWidth: 1200,
+        margin: "0 auto",
+        padding: "50px 20px 30px",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: 40,
+      }}>
+        {/* Логотип и описание */}
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <img src="/favicon.ico" alt="logo" style={{ width: 32, height: 32 }} />
+            <span style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>
+              ФУРШЕТ <span style={{ color: "#e53935" }}>ПЕРМЬ</span>
+            </span>
+          </div>
+          <p style={{ color: "#888", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+            Кейтеринг под ключ в Перми. Фуршетное обслуживание мероприятий любого масштаба с доставкой и обслуживанием на месте.
+          </p>
+        </div>
+
+        {/* Навигация */}
+        <div>
+          <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, margin: "0 0 16px 0" }}>Навигация</h4>
+          {navLinks.map((link) => (
+            <a
+              key={link.id}
+              href={`#${link.id}`}
+              style={{
+                display: "block",
+                color: "#888",
+                fontSize: 14,
+                textDecoration: "none",
+                padding: "4px 0",
+                transition: "color 0.3s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#e53935")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        {/* Контакты */}
+        <div>
+          <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, margin: "0 0 16px 0" }}>Контакты</h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <a href="tel:+79028092149" style={{ color: "#888", fontSize: 14, textDecoration: "none", transition: "color 0.3s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}>
+              📞 +7 (902) 809-21-49
+            </a>
+            <a href="mailto:furshetperm159@yandex.ru" style={{ color: "#888", fontSize: 14, textDecoration: "none", transition: "color 0.3s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}>
+              📧 furshetperm159@yandex.ru
+            </a>
+            <p style={{ color: "#888", fontSize: 14, margin: 0 }}>
+              📍 г. Пермь, пр. Парковый, д. 3
+            </p>
+          </div>
+        </div>
+
+        {/* Соцсети */}
+        <div>
+          <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, margin: "0 0 16px 0" }}>Соцсети</h4>
+          <div style={{ display: "flex", gap: 12 }}>
+            <a href="https://vk.ru/furshetperm2" target="_blank" rel="noopener noreferrer"
+              style={{
+                width: 42, height: 42, borderRadius: 10,
+                backgroundColor: "#1a1a1a", border: "1px solid #333",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                textDecoration: "none", fontSize: 20, transition: "all 0.3s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#e53935"; e.currentTarget.style.borderColor = "#e53935"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#1a1a1a"; e.currentTarget.style.borderColor = "#333"; }}
+            >
+              VK
+            </a>
+            <a href="https://t.me/Alina_Abaturova" target="_blank" rel="noopener noreferrer"
+              style={{
+                width: 42, height: 42, borderRadius: 10,
+                backgroundColor: "#1a1a1a", border: "1px solid #333",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                textDecoration: "none", fontSize: 20, transition: "all 0.3s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#e53935"; e.currentTarget.style.borderColor = "#e53935"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#1a1a1a"; e.currentTarget.style.borderColor = "#333"; }}
+            >
+              TG
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Нижняя полоска */}
+      <div style={{
+        borderTop: "1px solid #222",
+        padding: "20px",
+        textAlign: "center",
+        color: "#555",
+        fontSize: 13,
+      }}>
         © {new Date().getFullYear()} Фуршет Пермь. Все права защищены.
-      </p>
+      </div>
     </footer>
   );
 }

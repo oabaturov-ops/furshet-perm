@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Фуршетное обслуживание в Перми. Меню фуршетов, рецепты от шеф-повара, заказ банкета под ключ.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon-192.png",
     apple: "/icon-192.png",
   },
   other: {
