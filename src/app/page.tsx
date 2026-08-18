@@ -247,7 +247,7 @@ function Hero() {
           lineHeight: 1.2,
           textTransform: "uppercase",
         }}>
-          Фуршетное <span style={{ color: "#e53935" }}>обслуживание</span>
+          Фуршетная <span style={{ color: "#e53935" }}>служба</span>
           <br />в Перми
         </h1>
         <p style={{
@@ -757,7 +757,7 @@ function ContactsSection() {
                 lineHeight: 1.6,
                 margin: 0,
               }}>
-                г. Пермь, проспект Парковый, д. 3<br />
+                г. Пермь, проспект Парковый, д. 3/1<br />
                  </p>
             </div>
           </div>
@@ -1202,7 +1202,7 @@ function MenuSection({ cartItems, setCartItems }: { cartItems: CartItem[]; setCa
    COMMENTS — Отзывы
    ============================================ */
 function CommentsSection() {
-  const [comments, setComments] = useState<{ id: string; name: string; text: string; created_at: string }[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
   const [name, setName] = useState('');
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -1210,7 +1210,7 @@ function CommentsSection() {
   useEffect(() => {
     fetch('/api/comments')
       .then(res => res.json())
-      .then(data => setComments(data || []))
+      .then(data => setComments(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, []);
 
@@ -1273,7 +1273,7 @@ function CommentsSection() {
         </div>
 
         {/* Список отзывов */}
-        {comments.length === 0 ? (
+        {(!comments || !Array.isArray(comments) || comments.length === 0) ? (
           <p style={{ textAlign: "center", color: "#666", fontSize: 15 }}>Пока нет отзывов. Будьте первым!</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -1362,7 +1362,7 @@ function Footer() {
               📧 furshetperm159@yandex.ru
             </a>
             <p style={{ color: "#888", fontSize: 14, margin: 0 }}>
-              📍 г. Пермь, пр. Парковый, д. 3
+              📍 г. Пермь, пр. Парковый, д. 3/1
             </p>
           </div>
         </div>
