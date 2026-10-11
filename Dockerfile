@@ -5,8 +5,8 @@ WORKDIR /app
 # Настоящие ключи в публичный репо не тащим — модули уедут при переделке.
 ENV SUPABASE_URL=https://placeholder.supabase.co
 ENV SUPABASE_ANON_KEY=placeholder-key
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . .
 RUN npm run build
 EXPOSE 3000
