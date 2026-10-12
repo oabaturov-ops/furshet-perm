@@ -247,7 +247,7 @@ function Hero() {
           lineHeight: 1.2,
           textTransform: "uppercase",
         }}>
-          Фуршетная <span style={{ color: "#e53935" }}>служба</span>
+          <span style={{ color: "#d4af37" }}>Фуршетная служба</span>
           <br />в Перми
         </h1>
         <p style={{
@@ -389,7 +389,7 @@ function RecipesSection() {
   return (
     <section id="recipes" style={{
       padding: "80px 20px",
-      backgroundColor: "#111",
+      backgroundColor: "#282e7a",
     }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         {/* Заголовок */}
