@@ -21,5 +21,5 @@ jobs:
             git pull
             docker build -t furshet .
             docker rm -f furshet
-            docker run -d --name furshet --network web --restart unless-stopped furshet
+            docker run -d --name furshet --network web --restart unless-stopped -e DATABASE_URL="${{ secrets.DATABASE_URL }}" furshet
             docker image prune -f
