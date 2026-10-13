@@ -65,3 +65,27 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ==== Свиток Furshet: слой 2 (буквы) + слой 3 (палитра) ==== */
+
+:root {
+  --color-bg: #faf6f0;   /* кремовый — 90% площади */
+  --color-ink: #1c1a17;  /* тёплый чёрный — буквы */
+  --color-pink: #b85c68; /* ревеневый — капля, до 2% */
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-text), system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+::selection {
+  background: var(--color-pink);
+  color: #faf6f0;
+}

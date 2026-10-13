@@ -1,6 +1,19 @@
+import { Playfair_Display, Manrope } from "next/font/google";
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
+
+const playfair = Playfair_Display({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-text",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Фуршет Пермь — Фуршетная служба под ключ",
@@ -43,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru">
+    <html lang="ru" className={`${playfair.variable} ${manrope.variable}`}>
       <head>
         <meta name="theme-color" content="#e53935" />
         <script
