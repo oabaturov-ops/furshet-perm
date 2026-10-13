@@ -18,6 +18,7 @@ interface CartItem {
   quantity: number;
 }
    const heroImages = [
+  "/hero.jpg",
   "/images/hero1.jpg",
   "/images/hero2.jpg",
   "/images/hero3.jpg",
