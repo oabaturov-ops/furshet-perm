@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { attachSession, passwordMatches } from '@/lib/admin-auth'
 
 export async function POST(request: NextRequest) {
-  const { password } = await request.json()
-  const adminPassword = process.env.ADMIN_PASSWORD
+  let password: unknown = ''
+  try {
+    const body = await request.json()
+    password = body?.password
+  } catch {
+    return NextResponse.json({ error: 'Пустой запрос' }, { status: 400 })
+  }
 
-  if (!adminPassword || password !== adminPassword) {
+  if (!passwordMatches(password)) {
     return NextResponse.json({ error: 'Неверный пароль' }, { status: 401 })
   }
 
-  return NextResponse.json({ success: true, token: 'admin-session-' + Date.now() })
+  return attachSession(NextResponse.json({ success: true }))
 }

@@ -113,6 +113,16 @@ export default function AdminPage() {
     return () => clearInterval(interval);
   }, [isAuthenticated, orders, showNotification]);
 
+    useEffect(() => {
+    fetch('/api/admin/session')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.authenticated) setIsAuthenticated(true);
+        else setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -130,6 +140,12 @@ export default function AdminPage() {
     } catch {
       setAuthError('Ошибка подключения');
     }
+  };
+
+    const handleLogout = async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    setIsAuthenticated(false);
+    setPassword('');
   };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -369,8 +385,8 @@ export default function AdminPage() {
             <a href="/" className="text-gray-400 hover:text-white transition-colors text-sm">
               На сайт
             </a>
-            <button
-              onClick={() => setIsAuthenticated(false)}
+                        <button
+              onClick={handleLogout}
               className="text-gray-400 hover:text-red-400 transition-colors text-sm"
             >
               Выйти

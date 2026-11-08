@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDishes, createDish } from '@/lib/menu-store'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function GET() {
   try {
@@ -11,6 +12,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin()
+  if (denied) return denied
+
   try {
     const body = await req.json()
     const dish = await createDish(body)
