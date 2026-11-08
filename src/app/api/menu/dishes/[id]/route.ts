@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateDish, deleteDish } from '@/lib/menu-store'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin()
+  if (denied) return denied
+
   const { id } = await params
   try {
     const body = await req.json()
@@ -13,6 +17,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin()
+  if (denied) return denied
+
   const { id } = await params
   try {
     await deleteDish(id)

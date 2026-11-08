@@ -17,11 +17,11 @@ interface CartItem {
   price: string;
   quantity: number;
 }
-   const heroImages = [
-  "/hero.jpg",
+      const heroImages = [
   "/images/hero1.jpg",
   "/images/hero2.jpg",
   "/images/hero3.jpg",
+  "/images/hero4.jpg",
 ];
 
 /* Данные корзины */
@@ -230,7 +230,7 @@ function Hero() {
       <div style={{
         position: "absolute",
         inset: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        backgroundColor: "rgba(0, 0, 0, 0.3)",
         zIndex: 1,
       }} />
 
