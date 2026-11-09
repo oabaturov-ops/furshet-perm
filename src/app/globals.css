@@ -99,3 +99,9 @@ h1, h2, h3 {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Отступ при переходе по якорям под липкую шапку */
+section[id],
+div[id] {
+  scroll-margin-top: 72px;
+}

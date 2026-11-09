@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 cookies.txt
+
+src/app/page.tsx.backup
+
+src/app/page.tsx.backup
