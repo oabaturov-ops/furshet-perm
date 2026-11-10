@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getCategories, createCategory } from '@/lib/menu-store'
 import { requireAdmin } from '@/lib/admin-auth'

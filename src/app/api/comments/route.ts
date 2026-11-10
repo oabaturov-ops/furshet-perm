@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('comments')
     .select('*')
     .order('created_at', { ascending: false });
@@ -19,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Имя и текст обязательны' }, { status: 400 });
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('comments')
     .insert([{ name: name.trim(), text: text.trim() }])
     .select();

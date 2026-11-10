@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getCategories, getDishes } from '@/lib/menu-store'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const [categories, dishes] = await Promise.all([getCategories(), getDishes()])

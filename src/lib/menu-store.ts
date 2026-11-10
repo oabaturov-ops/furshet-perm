@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabase } from '@/lib/supabase'
 
 export interface CompositionItem { name: string; amount: string }
 
@@ -24,7 +24,7 @@ export interface Category {
 // ---- Categories ----
 
 export async function getCategories(): Promise<Category[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('categories')
     .select('*')
     .order('sort_order', { ascending: true })
@@ -39,7 +39,7 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function createCategory(name: string): Promise<Category> {
   const slug = slugify(name)
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('categories')
     .insert({ name, slug })
     .select()
@@ -50,7 +50,7 @@ export async function createCategory(name: string): Promise<Category> {
 
 export async function updateCategory(id: string, name: string): Promise<void> {
   const slug = slugify(name)
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('categories')
     .update({ name, slug })
     .eq('id', id)
@@ -58,7 +58,7 @@ export async function updateCategory(id: string, name: string): Promise<void> {
 }
 
 export async function deleteCategory(id: string): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('categories')
     .delete()
     .eq('id', id)
@@ -68,7 +68,7 @@ export async function deleteCategory(id: string): Promise<void> {
 // ---- Dishes ----
 
 export async function getDishes(): Promise<Dish[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('dishes')
     .select('*')
     .order('sort_order', { ascending: true })
@@ -88,7 +88,7 @@ export async function getDishes(): Promise<Dish[]> {
 }
 
 export async function createDish(dish: Omit<Dish, 'id'>): Promise<Dish> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('dishes')
     .insert({
       name: dish.name,
@@ -117,7 +117,7 @@ export async function createDish(dish: Omit<Dish, 'id'>): Promise<Dish> {
 }
 
 export async function updateDish(id: string, dish: Partial<Dish>): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('dishes')
     .update({
       name: dish.name,
@@ -134,7 +134,7 @@ export async function updateDish(id: string, dish: Partial<Dish>): Promise<void>
 }
 
 export async function deleteDish(id: string): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('dishes')
     .delete()
     .eq('id', id)
@@ -161,7 +161,7 @@ export interface Order {
 }
 
 export async function getOrders(): Promise<Order[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('orders')
     .select('*')
     .order('created_at', { ascending: false })
@@ -185,7 +185,7 @@ export async function createOrder(order: {
   items: OrderItem[]
   total: number
 }): Promise<Order> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('orders')
     .insert(order)
     .select()
@@ -204,7 +204,7 @@ export async function createOrder(order: {
 }
 
 export async function updateOrderStatus(id: string, status: string): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('orders')
     .update({ status })
     .eq('id', id)
@@ -212,7 +212,7 @@ export async function updateOrderStatus(id: string, status: string): Promise<voi
 }
 
 export async function deleteOrder(id: string): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('orders')
     .delete()
     .eq('id', id)

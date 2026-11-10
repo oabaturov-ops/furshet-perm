@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 import { requireAdmin } from '@/lib/admin-auth'
 
 const MAX_BYTES = 8 * 1024 * 1024 // 8 МБ
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
     const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
-    const { error } = await supabase.storage
+    const { error } = await getSupabase().storage
       .from('dishes')
       .upload(safeName, buffer, {
         contentType: file.type,
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    const { data } = supabase.storage.from('dishes').getPublicUrl(safeName)
+    const { data } = getSupabase().storage.from('dishes').getPublicUrl(safeName)
 
     return NextResponse.json({ url: data.publicUrl })
   } catch (e) {
