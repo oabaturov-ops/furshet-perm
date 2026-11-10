@@ -14,6 +14,7 @@ interface CartItem {
   name: string;
   price: string;
   quantity: number;
+  minQty?: number;
 }
 
 /* ============================================
@@ -144,7 +145,7 @@ function CartModal({
                     <button
                       onClick={() =>
                         setCartItems(
-                          item.quantity === 1
+                          item.quantity <= (item.minQty ?? 1)
                             ? cartItems.filter((c) => c.name !== item.name)
                             : cartItems.map((c) =>
                                 c.name === item.name
