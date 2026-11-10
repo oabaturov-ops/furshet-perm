@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 interface CompositionItem {
   id: string;
   name: string;
-  quantity: string;
+  amount: string;
 }
 
 interface Dish {
@@ -196,7 +196,7 @@ export default function AdminPage() {
   const addCompositionItem = () => {
     setComposition((prev) => [
       ...prev,
-      { id: `ci-${Date.now()}`, name: '', quantity: '' },
+      { id: `ci-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name: '', amount: '' },
     ]);
   };
 
@@ -204,7 +204,7 @@ export default function AdminPage() {
     setComposition((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const updateCompositionItem = (id: string, field: 'name' | 'quantity', value: string) => {
+  const updateCompositionItem = (id: string, field: 'name' | 'amount', value: string) => {
     setComposition((prev) =>
       prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
     );
@@ -223,7 +223,7 @@ export default function AdminPage() {
         image2: (dish as any).image2 || '',
         sortOrder: String(dish.sortOrder),
       });
-      setComposition(dish.composition || []);
+      setComposition((dish.composition || []).map((c: any) => ({ id: 'ci-' + Math.random().toString(36).slice(2, 8), name: c.name ?? '', amount: c.amount ?? '' })));
       setUploadedImage(dish.image || '');
       setUploadedImage2((dish as any).image2 || '');
     } else {
@@ -267,7 +267,7 @@ export default function AdminPage() {
           price: Number(dishForm.price),
           minQty: Number(dishForm.minQty) || 1,
           sortOrder: Number(dishForm.sortOrder),
-          composition: composition.filter((c) => c.name.trim()),
+          composition: composition.filter((c) => c.name.trim()).map((c) => ({ name: c.name.trim(), amount: c.amount.trim() })),
         }),
       });
       if (res.ok) {
@@ -768,8 +768,8 @@ export default function AdminPage() {
                         placeholder="Ингредиент"
                       />
                       <input
-                        value={item.quantity}
-                        onChange={(e) => updateCompositionItem(item.id, 'quantity', e.target.value)}
+                        value={item.amount}
+                        onChange={(e) => updateCompositionItem(item.id, 'amount', e.target.value)}
                         className="w-24 bg-[#111] border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#e53935]"
                         placeholder="Кол-во"
                       />
