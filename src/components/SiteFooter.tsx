@@ -56,7 +56,7 @@ export default function SiteFooter() {
             href="https://www.olegwebsolutions.ru/"
             target="_blank"
             rel="noopener noreferrer"
-            className="transition hover:text-[#1c1a17]"
+            className="text-sm font-medium tracking-wide text-[#1c1a17]/80 transition hover:text-[#b85c68]"
           >
             Создано OWS Studio
           </a>
