@@ -1,8 +1,9 @@
-name: Deploy furshet
+name: Deploy furshet (вручную)
 
+# Деплой на web-1 запускается только руками: Actions → Deploy furshet (вручную) → Run workflow.
+# Автоматический деплой по push отключён: прод сейчас на Vercel.
 on:
-  push:
-    branches: [redesign]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -18,8 +19,9 @@ jobs:
           script: |
             set -e
             cd ~/furshet
-            git pull
+            git fetch origin
+            git reset --hard origin/redesign
             docker build -t furshet .
             docker rm -f furshet
-            docker run -d --name furshet --network web --restart unless-stopped -e DATABASE_URL="${{ secrets.DATABASE_URL }}" furshet
+            docker run -d --name furshet --network web --restart unless-stopped -e DATABASE_URL="${{ secrets.DATABASE_URL }}" -e SUPABASE_URL="${{ secrets.SUPABASE_URL }}" -e SUPABASE_SERVICE_KEY="${{ secrets.SUPABASE_SERVICE_KEY }}" furshet
             docker image prune -f

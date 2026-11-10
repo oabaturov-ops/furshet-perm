@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Укажите телефон' }, { status: 400 })
     }
 
-    const { error } = await supabase.from('leads').insert({ name, phone, comment })
+    const { error } = await getSupabase().from('leads').insert({ name, phone, comment })
     if (error) throw error
 
     // Письмо не блокирует ответ: заявка уже в базе
