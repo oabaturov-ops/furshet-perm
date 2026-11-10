@@ -10,6 +10,7 @@ type Dish = {
   image: string | null
   image2: string | null
   composition: { name?: string; amount?: string }[]
+  minQty: number
 }
 
 export default function DishModal({
@@ -21,7 +22,7 @@ export default function DishModal({
   onClose: () => void
   onAdd: (qty: number) => void
 }) {
-  const [qty, setQty] = useState(1)
+  const [qty, setQty] = useState(dish.minQty || 1)
   const [photo, setPhoto] = useState(dish.image ?? '')
 
   const second = dish.image2
@@ -112,7 +113,7 @@ export default function DishModal({
 
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    onClick={() => setQty((q) => Math.max(dish.minQty || 1, q - 1))}
                     aria-label="Меньше"
                     className="h-9 w-9 rounded-full border border-[#1c1a17]/20 text-[#1c1a17] transition hover:border-[#1c1a17]"
                   >

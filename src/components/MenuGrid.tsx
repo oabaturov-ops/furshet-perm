@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import DishModal from '@/components/DishModal'
 
-type CartItem = { name: string; price: string; quantity: number }
+type CartItem = { name: string; price: string; quantity: number; minQty?: number }
 
 type ApiCategory = { id: string; name: string; slug: string; sortOrder: number }
 
@@ -18,6 +18,7 @@ type ApiDish = {
   sortOrder: number
   categoryId: string
   composition: { name?: string; amount?: string }[]
+  minQty: number
 }
 
 export default function MenuGrid({
@@ -59,22 +60,20 @@ export default function MenuGrid({
   const countInCart = (name: string) =>
     cartItems.find((i) => i.name === name)?.quantity ?? 0
 
-  const addToCart = (dish: ApiDish, qty = 1) => {
+  const addToCart = (dish: ApiDish, qty = 0) => {
+    const amount = Math.max(qty || 0, dish.minQty || 1, 1)
     setCartItems((prev) => {
       const existing = prev.find((i) => i.name === dish.name)
       if (existing) {
         return prev.map((i) =>
-          i.name === dish.name ? { ...i, quantity: i.quantity + qty } : i
+          i.name === dish.name ? { ...i, quantity: i.quantity + amount } : i
         )
       }
-      return [...prev, { name: dish.name, price: String(dish.price), quantity: qty }]
+      return [...prev, { name: dish.name, price: String(dish.price), quantity: amount, minQty: dish.minQty || 1 }]
     })
   }
 
-  const minQty = (description: string) => {
-    const match = description.match(/от\s*(\d+)/i)
-    return match ? Number(match[1]) : null
-  }
+  const minQty = (dish: ApiDish) => (dish.minQty > 1 ? dish.minQty : null)
 
   const tabClass = (isActive: boolean) =>
     `rounded-full border px-5 py-2 text-sm transition ${
@@ -130,7 +129,7 @@ export default function MenuGrid({
           <div className="mt-14 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((dish) => {
               const qty = countInCart(dish.name)
-              const min = minQty(dish.description)
+              const min = minQty(dish)
               return (
                 <article key={dish.id} className="group">
                   {/* Клик по фото и названию открывает карточку */}

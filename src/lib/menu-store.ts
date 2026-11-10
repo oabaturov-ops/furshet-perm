@@ -12,6 +12,7 @@ export interface Dish {
   sortOrder: number
   categoryId: string
   composition: CompositionItem[]
+  minQty: number
 }
 
 export interface Category {
@@ -83,6 +84,7 @@ export async function getDishes(): Promise<Dish[]> {
     sortOrder: d.sort_order ?? 0,
     categoryId: d.category_id,
     composition: d.composition ?? [],
+    minQty: d.min_qty ?? 1,
     
   }))
 }
@@ -99,6 +101,7 @@ export async function createDish(dish: Omit<Dish, 'id'>): Promise<Dish> {
       sort_order: dish.sortOrder,
       category_id: dish.categoryId,
       composition: dish.composition,
+      min_qty: dish.minQty ?? 1,
     })
     .select()
     .single()
@@ -113,6 +116,7 @@ export async function createDish(dish: Omit<Dish, 'id'>): Promise<Dish> {
     sortOrder: data.sort_order ?? 0,
     categoryId: data.category_id,
     composition: data.composition ?? [],
+    minQty: data.min_qty ?? 1,
   }
 }
 
@@ -128,6 +132,7 @@ export async function updateDish(id: string, dish: Partial<Dish>): Promise<void>
       sort_order: dish.sortOrder,
       category_id: dish.categoryId,
       composition: dish.composition,
+      min_qty: dish.minQty ?? 1,
     })
     .eq('id', id)
   if (error) throw error
