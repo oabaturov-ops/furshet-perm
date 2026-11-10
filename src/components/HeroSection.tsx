@@ -37,7 +37,7 @@ export default function HeroSection() {
       className="relative h-[calc(100svh-72px)] min-h-[520px] w-full overflow-hidden"
     >
       {/* Два фото: на мобильном — друг под другом */}
-      <div className="absolute inset-0 grid grid-cols-1 md:grid-cols-2">
+      <div className="absolute inset-0 grid grid-cols-1 gap-2 bg-[#faf6f0] md:grid-cols-2 md:gap-3">
         {SLIDES.map((slide, index) => (
           <div
             key={slide.src}

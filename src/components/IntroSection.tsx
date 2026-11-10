@@ -44,8 +44,8 @@ export default function IntroSection() {
         </p>
       </div>
 
-      <div ref={wrapRef} className="scroll-hidden mx-auto mt-16 max-w-5xl">
-        <div className="overflow-hidden rounded-[28px] bg-[#efe9df] shadow-[0_30px_80px_rgba(28,26,23,0.12)]">
+      <div ref={wrapRef} className="scroll-hidden -mx-6 mt-16">
+        <div className="overflow-hidden bg-[#efe9df]">
           <video
             ref={videoRef}
             className="aspect-video h-full w-full object-cover"
