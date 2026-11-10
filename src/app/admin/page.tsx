@@ -13,6 +13,7 @@ interface Dish {
   name: string;
   description: string;
   price: number;
+  minQty: number;
   categoryId: string;
   image: string;
   image2: string;
@@ -56,6 +57,7 @@ export default function AdminPage() {
     name: '',
     description: '',
     price: '',
+    minQty: '1',
     categoryId: '',
     image: '',
     image2: '',
@@ -215,6 +217,7 @@ export default function AdminPage() {
         name: dish.name,
         description: dish.description,
         price: String(dish.price),
+        minQty: String(dish.minQty ?? 1),
         categoryId: dish.categoryId,
         image: dish.image || '',
         image2: (dish as any).image2 || '',
@@ -225,7 +228,7 @@ export default function AdminPage() {
       setUploadedImage2((dish as any).image2 || '');
     } else {
       setEditingDish(null);
-      setDishForm({ name: '', description: '', price: '', categoryId: menuData?.categories[0]?.id || '', image: '', image2: '', sortOrder: '0' });
+      setDishForm({ name: '', description: '', price: '', categoryId: menuData?.categories[0]?.id || '', image: '', image2: '', minQty: '1', sortOrder: '0' });
       setComposition([]);
       setUploadedImage('');
       setUploadedImage2('');
@@ -262,6 +265,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           ...dishForm,
           price: Number(dishForm.price),
+          minQty: Number(dishForm.minQty) || 1,
           sortOrder: Number(dishForm.sortOrder),
           composition: composition.filter((c) => c.name.trim()),
         }),
@@ -718,15 +722,28 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Порядок сортировки</label>
-                <input
-                  type="number"
-                  value={dishForm.sortOrder}
-                  onChange={(e) => setDishForm((p) => ({ ...p, sortOrder: e.target.value }))}
-                  className="w-full bg-[#111] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#e53935]"
-                  placeholder="0"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Порядок сортировки</label>
+                  <input
+                    type="number"
+                    value={dishForm.sortOrder}
+                    onChange={(e) => setDishForm((p) => ({ ...p, sortOrder: e.target.value }))}
+                    className="w-full bg-[#111] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#e53935]"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Минимум, шт.</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={dishForm.minQty}
+                    onChange={(e) => setDishForm((p) => ({ ...p, minQty: e.target.value }))}
+                    className="w-full bg-[#111] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#e53935]"
+                    placeholder="1"
+                  />
+                </div>
               </div>
 
               <div>
