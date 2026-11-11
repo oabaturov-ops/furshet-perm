@@ -213,6 +213,8 @@ function CommentsSection() {
   const inputClass =
     "w-full border-b border-[#1c1a17]/20 bg-transparent py-3 text-sm text-[#1c1a17] outline-none transition placeholder:text-[#1c1a17]/40 focus:border-[#1c1a17]";
 
+  const [sent, setSent] = useState(false);
+
   useEffect(() => {
     fetch("/api/comments")
       .then((res) => res.json())
@@ -230,10 +232,10 @@ function CommentsSection() {
         body: JSON.stringify({ name: name.trim(), text: text.trim() }),
       });
       if (res.ok) {
-        const newComment = await res.json();
-        setComments([newComment, ...comments]);
         setName("");
         setText("");
+        setSent(true);
+        setTimeout(() => setSent(false), 6000);
       }
     } catch {}
     setSending(false);
@@ -273,6 +275,12 @@ function CommentsSection() {
           >
             {sending ? "Отправляем…" : "Отправить отзыв"}
           </button>
+
+          {sent ? (
+            <p className="text-center text-sm text-[#1c1a17]/60">
+              Спасибо! Отзыв появится на сайте после проверки.
+            </p>
+          ) : null}
         </div>
 
         {!comments || comments.length === 0 ? (

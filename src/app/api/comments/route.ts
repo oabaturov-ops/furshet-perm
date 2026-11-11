@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const { data, error } = await getSupabase()
     .from('comments')
     .select('*')
+    .eq('is_approved', true)
     .order('created_at', { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await getSupabase()
     .from('comments')
-    .insert([{ name: name.trim(), text: text.trim() }])
+    .insert([{ name: name.trim(), text: text.trim(), is_approved: false }])
     .select();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
