@@ -1,5 +1,5 @@
 export const SITE = {
-  url: 'https://furshet-perm.ru',
+  url: 'https://www.furshet-perm.ru',
   name: 'Фуршет Пермь',
   title: 'Фуршет Пермь — кейтеринг и фуршет с доставкой',
   description:

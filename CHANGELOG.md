@@ -5,6 +5,37 @@
 
 ---
 
+## 2026-11-11 — Канонический домен и подтверждение прав
+
+### Исправлено
+- Сайт отдаёт 308-редирект `furshet-perm.ru` → `www.furshet-perm.ru`, а метаданные
+  указывали адрес без www. Расхождение устранено: `SITE.url` переведён на `https://www.furshet-perm.ru`,
+  за ним подтянулись `canonical`, Open Graph, JSON-LD, `sitemap.xml` и `robots.txt`.
+
+### Добавлено
+- `public/google4dfd42c945ac76a4.html` — подтверждение прав для Google Search Console.
+
+### Затронутые файлы
+`src/lib/site.ts`, `public/google4dfd42c945ac76a4.html`, `CHANGELOG.md`
+
+---
+## 2026-11-11 — Модерация отзывов
+
+### Добавлено
+- Колонка `comments.is_approved` (boolean, default false) — новые отзывы приходят на проверку.
+- Вкладка «Отзывы» в админке: статус, кнопки «Опубликовать» / «Снять с публикации» / «Удалить».
+- API модерации `GET /api/admin/comments` и `PATCH|DELETE /api/admin/comments/[id]` (только для админа).
+
+### Изменено
+- Публичный `GET /api/comments` отдаёт только одобренные отзывы.
+- `POST /api/comments` создаёт отзыв со статусом «на проверке».
+- Форма на сайте после отправки показывает «Отзыв появится после проверки».
+
+### Затронутые файлы
+`src/app/api/comments/route.ts`, `src/app/api/admin/comments/**`, `src/app/admin/page.tsx`,
+`src/app/page.tsx`, `CHANGELOG.md`
+
+---
 ## 2026-11-11 — SEO
 
 ### Добавлено

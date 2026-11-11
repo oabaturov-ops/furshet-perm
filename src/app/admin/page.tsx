@@ -37,7 +37,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'dishes' | 'categories' | 'orders'>('dishes');
+  const [activeTab, setActiveTab] = useState<'dishes' | 'categories' | 'orders' | 'reviews'>('dishes');
   const [menuData, setMenuData] = useState<MenuData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDishModal, setShowDishModal] = useState(false);
@@ -51,6 +51,7 @@ export default function AdminPage() {
   const [uploadedImage2, setUploadedImage2] = useState('');
   const fileInputRef2 = useRef<HTMLInputElement>(null);
   const [orders, setOrders] = useState<any[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
 
   // Dish form state
   const [dishForm, setDishForm] = useState({
@@ -125,6 +126,29 @@ export default function AdminPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  const fetchComments = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/comments');
+      if (res.ok) setComments(await res.json());
+    } catch {
+      /* не критично */
+    }
+  }, []);
+
+  const setCommentApproved = async (id: string, value: boolean) => {
+    await fetch(`/api/admin/comments/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_approved: value }),
+    });
+    fetchComments();
+  };
+
+  const deleteComment = async (id: string) => {
+    if (!confirm('Удалить отзыв?')) return;
+    await fetch(`/api/admin/comments/${id}`, { method: 'DELETE' });
+    fetchComments();
+  };
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -435,6 +459,17 @@ export default function AdminPage() {
           >
             Заказы {orders.length > 0 && `(${orders.filter(o => o.status === 'new').length})`}
           </button>
+          <button
+            onClick={() => { setActiveTab('reviews'); fetchComments(); }}
+            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'reviews'
+                ? 'text-white'
+                : 'bg-[#1a1a1a] text-gray-400 hover:text-white'
+            }`}
+            style={activeTab === 'reviews' ? { backgroundColor: '#e53935' } : {}}
+          >
+            Отзывы
+          </button>
         </div>
 
         {loading ? (
@@ -567,7 +602,7 @@ export default function AdminPage() {
               )}
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'orders' ? (
           /* ===== ORDERS TAB ===== */
           <div>
             <h2 className="text-xl font-semibold mb-4">Заказы</h2>
@@ -617,6 +652,44 @@ export default function AdminPage() {
                       ))}
                     </div>
                     <div className="text-right font-bold text-lg" style={{ color: '#e53935' }}>{o.total} ₽</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          /* ===== REVIEWS TAB ===== */
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Отзывы</h2>
+            {!comments.length ? (
+              <p className="text-gray-500 text-center py-12">Отзывов пока нет</p>
+            ) : (
+              <div className="space-y-4">
+                {comments.map((c: any) => (
+                  <div key={c.id} className="bg-[#1a1a1a] rounded-xl border border-gray-800 p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <span className="font-medium">{c.name}</span>
+                        <span className="text-xs text-gray-500 ml-3">
+                          {new Date(c.created_at).toLocaleString('ru-RU')}
+                        </span>
+                      </div>
+                      <span className={c.is_approved ? 'text-xs px-2 py-1 rounded bg-green-900 text-green-300' : 'text-xs px-2 py-1 rounded bg-yellow-900 text-yellow-300'}>
+                        {c.is_approved ? 'Опубликован' : 'На проверке'}
+                      </span>
+                    </div>
+                    <p className="text-gray-300 text-sm mb-3 whitespace-pre-line">{c.text}</p>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => setCommentApproved(c.id, !c.is_approved)}
+                        className={c.is_approved ? 'text-yellow-400 hover:text-yellow-300 text-sm' : 'text-green-400 hover:text-green-300 text-sm'}
+                      >
+                        {c.is_approved ? 'Снять с публикации' : 'Опубликовать'}
+                      </button>
+                      <button onClick={() => deleteComment(c.id)} className="text-red-400 hover:text-red-300 text-sm">
+                        Удалить
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
