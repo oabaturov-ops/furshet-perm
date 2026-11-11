@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { reachGoal } from '@/lib/metrica';
 import SiteHeader from '@/components/SiteHeader'
 import HeroSection from '@/components/HeroSection'
 import IntroSection from '@/components/IntroSection'
@@ -68,6 +69,7 @@ function CartModal({
       });
       if (res.ok) {
         setCartItems([]);
+        reachGoal('order');
         setName("");
         setPhone("");
         setAddress("");
@@ -235,6 +237,7 @@ function CommentsSection() {
         setName("");
         setText("");
         setSent(true);
+        reachGoal('review');
         setTimeout(() => setSent(false), 6000);
       }
     } catch {}
