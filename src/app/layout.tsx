@@ -1,6 +1,7 @@
 import { Playfair_Display, Manrope } from "next/font/google";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -16,29 +17,44 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Фуршет Пермь — Фуршетная служба под ключ",
-  description: "Фуршетная служба Пермь. Кейтеринг под ключ: фуршетное обслуживание корпоративов, свадеб, дней рождений. Доставка, обслуживание на месте, меню на любой бюджет.",
-  keywords: "фуршет Пермь, кейтеринг Пермь, фуршетное обслуживание, заказ фуршета, банкеты Пермь, выездное обслуживание, кейтеринг под ключ",
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: SITE.title,
+    template: `%s — ${SITE.name}`,
+  },
+  description: SITE.description,
+  keywords:
+    "фуршет Пермь, кейтеринг Пермь, фуршетное обслуживание, заказ фуршета, банкеты Пермь, выездное обслуживание, кейтеринг под ключ",
+  applicationName: SITE.name,
   manifest: "/manifest.json",
   icons: {
     icon: "/icon-192.png",
     apple: "/icon-192.png",
   },
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Фуршет Пермь — Фуршетная служба под ключ",
-    description: "Фуршетная служба в Перми. Кейтеринг под ключ для мероприятий любого масштаба.",
-    url: "https://furshet-perm.ru",
-    siteName: "Фуршет Пермь",
-    locale: "ru_RU",
     type: "website",
+    locale: "ru_RU",
+    url: SITE.url,
+    siteName: SITE.name,
+    title: SITE.title,
+    description: SITE.description,
     images: [
       {
-        url: "/icon-512.png",
-        width: 512,
-        height: 512,
-        alt: "Фуршет Пермь",
+        url: "/images/top-left.jpg",
+        width: 2000,
+        height: 1331,
+        alt: "Сервировка фуршета в Перми",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE.title,
+    description: SITE.description,
+    images: ["/images/top-left.jpg"],
   },
   robots: {
     index: true,
@@ -50,6 +66,45 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#faf6f0",
+  width: "device-width",
+  initialScale: 1,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FoodEstablishment",
+  name: SITE.name,
+  url: SITE.url,
+  image: `${SITE.url}/images/top-left.jpg`,
+  telephone: SITE.phoneRaw,
+  email: SITE.email,
+  priceRange: "₽₽",
+  servesCuisine: ["Кейтеринг", "Фуршет"],
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: SITE.street,
+    addressLocality: SITE.city,
+    addressCountry: SITE.country,
+  },
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      opens: "09:00",
+      closes: "21:00",
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Saturday", "Sunday"],
+      opens: "10:00",
+      closes: "22:00",
+    },
+  ],
+  sameAs: [SITE.vk, SITE.telegram],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -58,12 +113,15 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`${playfair.variable} ${manrope.variable}`}>
       <head>
-        <meta name="theme-color" content="#e53935" />
         <script
           async
           dangerouslySetInnerHTML={{
             __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}`,
           }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body>{children}</body>
