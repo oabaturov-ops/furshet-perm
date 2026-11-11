@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { reachGoal } from '@/lib/metrica'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -47,6 +48,7 @@ export default function ContactsBlock() {
       })
       if (!res.ok) throw new Error('server')
       setStatus('sent')
+      reachGoal('lead')
       setForm({ name: '', phone: '', date: '', guests: '', comment: '', company: '' })
     } catch {
       setStatus('error')
