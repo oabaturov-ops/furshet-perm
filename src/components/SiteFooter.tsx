@@ -52,6 +52,10 @@ export default function SiteFooter() {
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-[#1c1a17]/10 pt-7 text-xs text-[#1c1a17]/45 md:flex-row">
           <p>© {new Date().getFullYear()} Фуршет Пермь. Все права защищены.</p>
 
+          <a href="/privacy" className="transition hover:text-[#1c1a17]">
+            Политика конфиденциальности
+          </a>
+
           <a
             href="https://www.olegwebsolutions.ru/"
             target="_blank"

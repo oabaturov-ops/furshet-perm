@@ -22,9 +22,11 @@ export default function ContactsBlock() {
     company: '',
   })
   const [status, setStatus] = useState<Status>('idle')
+  const [agree, setAgree] = useState(false)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!agree) return
     setStatus('sending')
 
     const extra = [
@@ -178,15 +180,26 @@ export default function ContactsBlock() {
 
               <button
                 type="submit"
-                disabled={status === 'sending'}
+                disabled={status === 'sending' || !agree}
                 className="w-full rounded-full bg-[#1c1a17] py-3.5 text-sm font-medium text-[#faf6f0] transition hover:bg-[#b85c68] disabled:opacity-50"
               >
                 {status === 'sending' ? 'Отправляем…' : 'Отправить заявку'}
               </button>
 
-              <p className="text-center text-[11px] leading-relaxed text-[#1c1a17]/40">
-                Нажимая кнопку, вы соглашаетесь на обработку персональных данных
-              </p>
+<label className="flex items-start gap-2 text-[11px] leading-relaxed text-[#1c1a17]/60">
+                <input
+                  type="checkbox"
+                  checked={agree}
+                  onChange={(e) => setAgree(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[#1c1a17]"
+                />
+                <span>
+                  Согласен с{" "}
+                  <a href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-[#1c1a17]">
+                    политикой обработки персональных данных
+                  </a>
+                </span>
+              </label>
             </form>
           )}
         </div>

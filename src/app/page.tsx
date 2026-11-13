@@ -40,11 +40,16 @@ function CartModal({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [agree, setAgree] = useState(false);
   const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
+    if (!agree) {
+      setError("Подтвердите согласие на обработку данных");
+      return;
+    }
     if (!name.trim() || !phone.trim()) {
       setError("Укажите имя и телефон");
       return;
@@ -189,9 +194,23 @@ function CartModal({
 
             {error ? <p className="mt-3 text-sm text-[#c8352f]">{error}</p> : null}
 
+            <label className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-[#1c1a17]/60">
+              <input
+                type="checkbox"
+                checked={agree}
+                onChange={(e) => setAgree(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#1c1a17]"
+              />
+              <span>
+                Согласен с{" "}
+                <a href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-[#1c1a17]">
+                  политикой обработки персональных данных
+                </a>
+              </span>
+            </label>
             <button
               onClick={handleSubmit}
-              disabled={sending}
+              disabled={sending || !agree}
               className="mt-5 w-full rounded-full bg-[#1c1a17] py-3.5 text-sm font-medium text-[#faf6f0] transition hover:bg-[#b85c68] disabled:opacity-50"
             >
               {sending ? "Отправляем…" : "Оформить заказ"}
@@ -210,6 +229,7 @@ function CommentsSection() {
   const [comments, setComments] = useState<any[]>([]);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
+  const [agree, setAgree] = useState(false);
   const [sending, setSending] = useState(false);
 
   const inputClass =
@@ -225,7 +245,7 @@ function CommentsSection() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!name.trim() || !text.trim()) return;
+    if (!agree || !name.trim() || !text.trim()) return;
     setSending(true);
     try {
       const res = await fetch("/api/comments", {
@@ -271,9 +291,23 @@ function CommentsSection() {
             rows={3}
             className={`${inputClass} resize-none`}
           />
+          <label className="flex items-start gap-2 text-[11px] leading-relaxed text-[#1c1a17]/60">
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[#1c1a17]"
+            />
+            <span>
+              Согласен с{" "}
+              <a href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-[#1c1a17]">
+                политикой обработки персональных данных
+              </a>
+            </span>
+          </label>
           <button
             onClick={handleSubmit}
-            disabled={sending || !name.trim() || !text.trim()}
+            disabled={sending || !agree || !name.trim() || !text.trim()}
             className="w-full rounded-full bg-[#1c1a17] py-3.5 text-sm font-medium text-[#faf6f0] transition hover:bg-[#b85c68] disabled:opacity-40"
           >
             {sending ? "Отправляем…" : "Отправить отзыв"}

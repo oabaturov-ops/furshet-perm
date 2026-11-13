@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
-import { getSupabase } from '@/lib/supabase'
+import { getDb } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,10 +20,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Укажите телефон' }, { status: 400 })
     }
 
-    const { error } = await getSupabase().from('leads').insert({ name, phone, comment })
-    if (error) throw error
+    await getDb().query(
+      'insert into leads (name, phone, comment) values ($1, $2, $3)',
+      [name, phone, comment]
+    )
 
-    // Письмо не блокирует ответ: заявка уже в базе
     try {
       if (process.env.SMTP_HOST) {
         const transporter = nodemailer.createTransport({
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
           to: process.env.ORDER_EMAIL,
           subject: 'Новая заявка с сайта',
           text: [
-            'Заявка с сайта furshet-perm.ru',
+            'Заявка с сайта',
             '',
             `Имя: ${name}`,
             `Телефон: ${phone}`,
