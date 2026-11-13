@@ -1,7 +1,7 @@
 name: Deploy furshet (вручную)
 
 # Деплой на web-1 запускается только руками:
-# Actions → Deploy furshet (вручную) → Run workflow.
+# Actions → Deploy furshet (вручную) → Run workflow → ветка redesign.
 on:
   workflow_dispatch:
 
@@ -21,7 +21,22 @@ jobs:
             cd ~/furshet
             git fetch origin
             git reset --hard origin/redesign
+
+            mkdir -p ~/furshet-env
+            cat > ~/furshet-env/app.env <<'ENVEOF'
+            DATABASE_URL=${{ secrets.DATABASE_URL_LOCAL }}
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY }}
+            ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
+            SMTP_PORT=${{ secrets.SMTP_PORT }}
+            SMTP_USER=${{ secrets.SMTP_USER }}
+            SMTP_PASS=${{ secrets.SMTP_PASS }}
+            ORDER_EMAIL=${{ secrets.ORDER_EMAIL }}
+            ENVEOF
+            chmod 600 ~/furshet-env/app.env
+
             docker build -t furshet .
-            docker rm -f furshet
-            docker run -d --name furshet --network web --restart unless-stopped -e DATABASE_URL="${{ secrets.DATABASE_URL_LOCAL }}"
+            docker rm -f furshet || true
+            docker run -d --name furshet --network web --restart unless-stopped --env-file ~/furshet-env/app.env furshet
             docker image prune -f
