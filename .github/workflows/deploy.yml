@@ -38,5 +38,5 @@ jobs:
 
             docker build -t furshet .
             docker rm -f furshet || true
-            docker run -d --name furshet --network web --restart unless-stopped --env-file ~/furshet-env/app.env furshet
+            docker run -d --name furshet --network web --restart unless-stopped -v furshet_uploads:/app/public/uploads --env-file ~/furshet-env/app.env furshet
             docker image prune -f
