@@ -28,9 +28,8 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-serif text-xl text-[#1c1a17]">1. Оператор</h2>
             <p className="mt-3">
-              Оператор персональных данных — [указать организацию: ИП / ООО,
-              ИНН, ОГРН], адрес: {SITE.street}, {SITE.city}. Контакт для обращений:
-              {" "}
+              Оператор персональных данных — Абатурова А.А., ИНН 590422535559, адрес: {SITE.street}, {SITE.city}. Контакт для обращений:
+              {""}
               <a href={`mailto:${SITE.email}`} className="underline underline-offset-4">
                 {SITE.email}
               </a>
