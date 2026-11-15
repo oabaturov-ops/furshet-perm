@@ -25,9 +25,7 @@ jobs:
             mkdir -p ~/furshet-env
             cat > ~/furshet-env/app.env <<'ENVEOF'
             DATABASE_URL=${{ secrets.DATABASE_URL_LOCAL }}
-            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-            SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY }}
-            ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+                                    ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
             SMTP_HOST=${{ secrets.SMTP_HOST }}
             SMTP_PORT=${{ secrets.SMTP_PORT }}
             SMTP_USER=${{ secrets.SMTP_USER }}
