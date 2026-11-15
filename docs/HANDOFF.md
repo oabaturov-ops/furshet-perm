@@ -1,0 +1,192 @@
+# Передача дел по проекту «Фуршет Пермь»
+
+Документ для продолжения работы в новой сессии или через полгода.
+Обновлять при серьёзных изменениях инфраструктуры.
+
+---
+
+## 1. Что это за проект
+
+Сайт фуршетной службы в Перми: витрина готовых блюд с корзиной, заявками и админкой.
+Домен — **https://www.furshet-perm.ru** (и без www, оба обслуживает Caddy).
+
+**Сайт полностью размещён в РФ**, персональные данные (заявки, заказы) не покидают сервер.
+
+---
+
+## 2. Стек
+
+| Слой | Технология |
+|---|---|
+| Фронтенд | Next.js 16 (App Router), React 19, Tailwind CSS v4 |
+| База | PostgreSQL 17 в Docker, драйвер `pg` |
+| Картинки | локальный диск, Docker-том `furshet_uploads` |
+| Почта | nodemailer, SMTP Яндекса (порт 587) |
+| Аналитика | Яндекс.Метрика, счётчик `114183420` |
+| Хостинг | VPS web-1, Timeweb, Новосибирск, Ubuntu 24.04 |
+| Прокси и HTTPS | Caddy (контейнер), автоматические сертификаты Let's Encrypt |
+| DNS | Cloudflare в режиме **DNS only** (серая тучка) |
+| Код | GitHub `oabaturov-ops/furshet-perm`, рабочая ветка `redesign` |
+
+---
+
+## 3. Где что лежит на сервере
+
+| Путь | Что там |
+|---|---|
+| `~/furshet` | рабочая копия репозитория, из неё собирается образ |
+| `~/furshet-env/app.env` | переменные окружения контейнера (пароли, SMTP) |
+| `/root/caddy/Caddyfile` | конфиг Caddy со всеми сайтами на сервере |
+| `/root/backups/` | дампы базы (`furshet-final.dump` и др.) |
+| `/root/furshet-uploads/` | исходная папка с фотографиями (источник для тома) |
+| `/root/backups/backup-db.sh` | скрипт резервного копирования (если настроен) |
+
+**Контейнеры проекта:**
+
+```
+furshet       — приложение (Next.js), порт 3000 внутри docker-сети web
+furshet-db    — PostgreSQL 17, том furshet_pgdata
+furshet_uploads — Docker-том с фотографиями, монтируется в /app/public/uploads
+```
+
+---
+
+## 4. Как задеплоить изменения кода
+
+Деплой **ручной** — автоматического по push нет.
+
+1. Локально:
+   ```powershell
+   cd C:\Users\oba12\Documents\furshet-perm
+   npm run build
+   git add -A
+   git commit -m "что изменили"
+   git push
+   ```
+2. GitHub → **Actions** → «Deploy furshet (вручную)» → **Run workflow**
+   → ветка **redesign** → Run.
+3. Через 2–4 минуты проверить:
+   ```bash
+   docker logs furshet --tail 30
+   curl -s -o /dev/null -w "%{http_code}\n" https://furshet-perm.ru/
+   ```
+
+Скрипт деплоя на сервере делает: `git reset --hard origin/redesign` →
+`docker build` → пересоздаёт контейнер с env-файлом и томом.
+
+**Важно:** сервер собирает то, что лежит в `origin/redesign`. Локальные
+незакоммиченные правки он не видит.
+
+---
+
+## 5. Что меняется без деплоя
+
+Цены, названия, описания, состав, минимальный заказ, фото — всё это данные
+в базе. Правятся в `/admin` и появляются на сайте сразу.
+
+Деплой нужен только для изменений **кода** (вёрстка, компоненты, API, тексты в `.tsx`).
+
+---
+
+## 6. База данных
+
+Подключение — только внутри docker-сети, снаружи порт не открыт:
+
+```
+postgresql://furshet:ПАРОЛЬ@furshet-db:5432/furshet
+```
+
+Пароль — в `~/furshet-env/app.env` и в секрете GitHub `DATABASE_URL_LOCAL`.
+
+Полезные команды:
+
+```bash
+# зайти в psql
+docker exec -it furshet-db psql -U furshet -d furshet
+
+# счётчики
+docker exec -it furshet-db psql -U furshet -d furshet -P pager=off -c "select 'dishes' t, count(*) from dishes union all select 'orders', count(*) from orders union all select 'leads', count(*) from leads;"
+
+# дамп вручную
+docker exec furshet-db pg_dump -U furshet -d furshet -Fc > /root/backups/manual-$(date +%F).dump
+```
+
+**Бэкапы:** скрипт `/root/backups/backup-db.sh`, cron в 4:00, хранение 7 дней.
+Раз в неделю забирать дамп на компьютер:
+
+```powershell
+scp web-1:/root/backups/daily/furshet-*.dump C:\Users\oba12\Documents\furshet-backups\
+```
+
+---
+
+## 7. Картинки
+
+- Загружаются из админки в `public/uploads` контейнера, но физически лежат в томе
+  `furshet_uploads` — переживают пересборку.
+- Отдаются через собственный роут `GET /uploads/[name]`
+  (Next.js не раздаёт файлы, появившиеся в `public` после сборки).
+- 31 старое фото перенесено из Supabase Storage в том.
+
+---
+
+## 8. Деплой на сервер и SSH
+
+```bash
+ssh web-1          # настроено в ~/.ssh/config, ключ id_ed25519
+```
+
+GitHub Actions подключается ключом из секрета `SSH_PRIVATE_KEY`
+(на сервере соответствующий `~/.ssh/deploy_key`).
+
+---
+
+## 9. Известные подводные камни
+
+| Проблема | Причина | Решение |
+|---|---|---|
+| Письма не уходят | хостинг блокировал порты 25/465/587 | Timeweb открыл 587 по заявке; если повторится — писать в поддержку |
+| Сайт «не открывается», в консоли `sw.js` и `Failed to convert value to Response` | старый service worker | удалён из проекта; при рецидиве — `chrome://serviceworker-internals` → Unregister |
+| Медленная загрузка (0.9 с) | трафик шёл через Cloudflare (ARN/AMS) в Новосибирск | Cloudflare переведён в **DNS only**, TTFB 0.05–0.18 с |
+| Фото 404 после загрузки | Next не отдаёт файлы, появившиеся в `public` после сборки | роут `/uploads/[name]` |
+| `npm run dev` без меню | локально нет `DATABASE_URL` | нужна локальная копия базы (Docker Desktop) |
+| Деплой «зелёный», но изменений нет | не запущен Run workflow или не сделан push | проверить `git log` и `origin/redesign` |
+
+---
+
+## 10. Что сделано (кратко)
+
+- Редизайн главной в духе Rhubarb: hero с двумя фото, видео, меню из базы, галерея, о нас, контакты, футер.
+- Админка: блюда, категории, заказы, отзывы с модерацией, минимум заказа, состав блюда, загрузка фото.
+- Безопасность: HttpOnly-сессия админки, закрытые API, RLS в Supabase закрыт.
+- Юридическое: политика ПДн, согласия в формах, канонический домен, sitemap, robots, JSON-LD.
+- Инфраструктура: перенос с Vercel+Supabase на собственный сервер, Postgres, Caddy, бэкапы.
+- Аналитика: Яндекс.Метрика с целями `lead`, `order`, `review`.
+
+Подробная история — в `CHANGELOG.md`.
+
+---
+
+## 11. Что осталось
+
+| Задача | Зачем |
+|---|---|
+| Бэкапы в cron (если ещё не) | база в одном экземпляре |
+| Telegram-уведомления о заказах | страховка, если почта отвалится |
+| Серверный рендер меню | SEO: сейчас блюда не видны роботам |
+| Удалить проект Supabase | после недели стабильной работы |
+| Локальная база для разработки | `npm run dev` без боевых данных |
+| Модерация отзывов — проверить на проде | убедиться, что новые отзывы не видны до одобрения |
+
+---
+
+## 12. Контакты и доступы
+
+- Сервер: Timeweb, `129.101.114.103`, пользователь `root`.
+- Домен и DNS: Cloudflare, зона `furshet-perm.ru`.
+- Репозиторий: `github.com/oabaturov-ops/furshet-perm`.
+- Почта сайта: `furshetperm159@yandex.ru`.
+- Метрика: счётчик `114183420`.
+
+Секреты в документе **не хранятся** — они в `~/furshet-env/app.env` на сервере
+и в GitHub Secrets.
