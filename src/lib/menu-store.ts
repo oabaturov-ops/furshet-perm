@@ -1,6 +1,9 @@
-import { getSupabase } from '@/lib/supabase'
+import { getDb } from './db'
 
-export interface CompositionItem { name: string; amount: string }
+export interface CompositionItem {
+  name: string
+  amount: string
+}
 
 export interface Dish {
   id: string
@@ -22,15 +25,41 @@ export interface Category {
   sortOrder: number
 }
 
-// ---- Categories ----
+type DishRow = {
+  id: string
+  name: string
+  description: string | null
+  price: number
+  image: string | null
+  image2: string | null
+  sort_order: number | null
+  category_id: string | null
+  composition: CompositionItem[] | null
+  min_qty: number | null
+}
+
+function mapDish(row: DishRow): Dish {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description ?? '',
+    price: row.price ?? 0,
+    image: row.image,
+    image2: row.image2,
+    sortOrder: row.sort_order ?? 0,
+    categoryId: row.category_id ?? '',
+    composition: Array.isArray(row.composition) ? row.composition : [],
+    minQty: row.min_qty ?? 1,
+  }
+}
+
+// ---- Категории ----
 
 export async function getCategories(): Promise<Category[]> {
-  const { data, error } = await getSupabase()
-    .from('categories')
-    .select('*')
-    .order('sort_order', { ascending: true })
-  if (error) throw error
-  return (data ?? []).map((c: any) => ({
+  const { rows } = await getDb().query(
+    'select id, name, slug, sort_order from categories order by sort_order, name'
+  )
+  return rows.map((c: any) => ({
     id: c.id,
     name: c.name,
     slug: c.slug ?? '',
@@ -40,113 +69,87 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function createCategory(name: string): Promise<Category> {
   const slug = slugify(name)
-  const { data, error } = await getSupabase()
-    .from('categories')
-    .insert({ name, slug })
-    .select()
-    .single()
-  if (error) throw error
-  return { id: data.id, name: data.name, slug: data.slug ?? '', sortOrder: data.sort_order ?? 0 }
+  const { rows } = await getDb().query(
+    'insert into categories (name, slug) values ($1, $2) returning *',
+    [name, slug]
+  )
+  const c = rows[0]
+  return { id: c.id, name: c.name, slug: c.slug ?? '', sortOrder: c.sort_order ?? 0 }
 }
 
 export async function updateCategory(id: string, name: string): Promise<void> {
   const slug = slugify(name)
-  const { error } = await getSupabase()
-    .from('categories')
-    .update({ name, slug })
-    .eq('id', id)
-  if (error) throw error
+  await getDb().query('update categories set name = $1, slug = $2 where id = $3', [
+    name,
+    slug,
+    id,
+  ])
 }
 
 export async function deleteCategory(id: string): Promise<void> {
-  const { error } = await getSupabase()
-    .from('categories')
-    .delete()
-    .eq('id', id)
-  if (error) throw error
+  await getDb().query('delete from categories where id = $1', [id])
 }
 
-// ---- Dishes ----
+// ---- Блюда ----
 
 export async function getDishes(): Promise<Dish[]> {
-  const { data, error } = await getSupabase()
-    .from('dishes')
-    .select('*')
-    .order('sort_order', { ascending: true })
-  if (error) throw error
-  return (data ?? []).map((d: any) => ({
-    id: d.id,
-    name: d.name,
-    description: d.description ?? '',
-    price: d.price ?? 0,
-    image: d.image,
-    image2: d.image2,
-    sortOrder: d.sort_order ?? 0,
-    categoryId: d.category_id,
-    composition: d.composition ?? [],
-    minQty: d.min_qty ?? 1,
-    
-  }))
+  const { rows } = await getDb().query('select * from dishes order by sort_order, name')
+  return rows.map(mapDish)
 }
 
 export async function createDish(dish: Omit<Dish, 'id'>): Promise<Dish> {
-  const { data, error } = await getSupabase()
-    .from('dishes')
-    .insert({
-      name: dish.name,
-      description: dish.description,
-      price: dish.price,
-      image: dish.image,
-      image2: dish.image2,
-      sort_order: dish.sortOrder,
-      category_id: dish.categoryId,
-      composition: dish.composition,
-      min_qty: dish.minQty ?? 1,
-    })
-    .select()
-    .single()
-  if (error) throw error
-  return {
-    id: data.id,
-    name: data.name,
-    description: data.description ?? '',
-    price: data.price ?? 0,
-    image: data.image,
-    image2: data.image2,
-    sortOrder: data.sort_order ?? 0,
-    categoryId: data.category_id,
-    composition: data.composition ?? [],
-    minQty: data.min_qty ?? 1,
-  }
+  const { rows } = await getDb().query(
+    `insert into dishes
+       (name, description, price, image, image2, sort_order, category_id, composition, min_qty)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     returning *`,
+    [
+      dish.name,
+      dish.description,
+      dish.price,
+      dish.image,
+      dish.image2,
+      dish.sortOrder,
+      dish.categoryId || null,
+      JSON.stringify(dish.composition ?? []),
+      dish.minQty ?? 1,
+    ]
+  )
+  return mapDish(rows[0])
 }
 
 export async function updateDish(id: string, dish: Partial<Dish>): Promise<void> {
-  const { error } = await getSupabase()
-    .from('dishes')
-    .update({
-      name: dish.name,
-      description: dish.description,
-      price: dish.price,
-      image: dish.image,
-      image2: dish.image2,
-      sort_order: dish.sortOrder,
-      category_id: dish.categoryId,
-      composition: dish.composition,
-      min_qty: dish.minQty ?? 1,
-    })
-    .eq('id', id)
-  if (error) throw error
+  const { rows } = await getDb().query('select * from dishes where id = $1', [id])
+  if (rows.length === 0) throw new Error('Блюдо не найдено')
+
+  const current = mapDish(rows[0])
+  const next = { ...current, ...dish }
+
+  await getDb().query(
+    `update dishes set
+       name = $1, description = $2, price = $3, image = $4, image2 = $5,
+       sort_order = $6, category_id = $7, composition = $8, min_qty = $9
+     where id = $10`,
+    [
+      next.name,
+      next.description,
+      next.price,
+      next.image,
+      next.image2,
+      next.sortOrder,
+      next.categoryId || null,
+      JSON.stringify(next.composition ?? []),
+      next.minQty ?? 1,
+      id,
+    ]
+  )
 }
 
 export async function deleteDish(id: string): Promise<void> {
-  const { error } = await getSupabase()
-    .from('dishes')
-    .delete()
-    .eq('id', id)
-  if (error) throw error
+  await getDb().query('delete from dishes where id = $1', [id])
 }
 
-// ---- Orders ----
+// ---- Заказы ----
 
 export interface OrderItem {
   name: string
@@ -165,22 +168,22 @@ export interface Order {
   created_at: string
 }
 
-export async function getOrders(): Promise<Order[]> {
-  const { data, error } = await getSupabase()
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return (data ?? []).map((o: any) => ({
+function mapOrder(o: any): Order {
+  return {
     id: o.id,
     customer_name: o.customer_name,
     phone: o.phone,
     address: o.address ?? '',
-    items: o.items ?? [],
-    total: Number(o.total) ?? 0,
+    items: Array.isArray(o.items) ? o.items : [],
+    total: Number(o.total) || 0,
     status: o.status ?? 'new',
     created_at: o.created_at,
-  }))
+  }
+}
+
+export async function getOrders(): Promise<Order[]> {
+  const { rows } = await getDb().query('select * from orders order by created_at desc')
+  return rows.map(mapOrder)
 }
 
 export async function createOrder(order: {
@@ -190,53 +193,37 @@ export async function createOrder(order: {
   items: OrderItem[]
   total: number
 }): Promise<Order> {
-  const { data, error } = await getSupabase()
-    .from('orders')
-    .insert(order)
-    .select()
-    .single()
-  if (error) throw error
-  return {
-    id: data.id,
-    customer_name: data.customer_name,
-    phone: data.phone,
-    address: data.address ?? '',
-    items: data.items ?? [],
-    total: Number(data.total) ?? 0,
-    status: data.status ?? 'new',
-    created_at: data.created_at,
-  }
+  const { rows } = await getDb().query(
+    `insert into orders (customer_name, phone, address, items, total)
+     values ($1, $2, $3, $4, $5) returning *`,
+    [order.customer_name, order.phone, order.address, JSON.stringify(order.items), order.total]
+  )
+  return mapOrder(rows[0])
 }
 
 export async function updateOrderStatus(id: string, status: string): Promise<void> {
-  const { error } = await getSupabase()
-    .from('orders')
-    .update({ status })
-    .eq('id', id)
-  if (error) throw error
+  await getDb().query('update orders set status = $1 where id = $2', [status, id])
 }
 
 export async function deleteOrder(id: string): Promise<void> {
-  const { error } = await getSupabase()
-    .from('orders')
-    .delete()
-    .eq('id', id)
-  if (error) throw error
+  await getDb().query('delete from orders where id = $1', [id])
 }
 
-// ---- Helpers ----
-
-export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
-}
+// ---- Утилиты ----
 
 export function slugify(text: string): string {
-  const m: Record<string, string> = {
-    'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z',
-    'и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r',
-    'с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'ts','ч':'ch','ш':'sh','щ':'sch',
-    'ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya',' ':'-'
+  const map: Record<string, string> = {
+    а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'yo', ж: 'zh', з: 'z',
+    и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r',
+    с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch',
+    ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya', ' ': '-',
   }
-  return text.toLowerCase().split('').map(c => m[c] ?? c).join('')
-    .replace(/[^a-z0-9-]/g,'').replace(/-+/g,'-').replace(/^-|-$/g,'')
+  return text
+    .toLowerCase()
+    .split('')
+    .map((c) => map[c] ?? c)
+    .join('')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }

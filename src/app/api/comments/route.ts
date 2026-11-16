@@ -1,32 +1,36 @@
 import { NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/supabase';
+import { getDb } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const { data, error } = await getSupabase()
-    .from('comments')
-    .select('*')
-    .eq('is_approved', true)
-    .order('created_at', { ascending: false });
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  try {
+    const { rows } = await getDb().query(
+      'select * from comments where is_approved = true order by created_at desc'
+    );
+    return NextResponse.json(rows);
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { name, text } = body;
+  try {
+    const body = await request.json();
+    const name = String(body.name ?? '').trim();
+    const text = String(body.text ?? '').trim();
 
-  if (!name?.trim() || !text?.trim()) {
-    return NextResponse.json({ error: 'Имя и текст обязательны' }, { status: 400 });
+    if (!name || !text) {
+      return NextResponse.json({ error: 'Имя и текст обязательны' }, { status: 400 });
+    }
+
+    const { rows } = await getDb().query(
+      'insert into comments (name, text, is_approved) values ($1, $2, false) returning *',
+      [name, text]
+    );
+
+    return NextResponse.json(rows[0], { status: 201 });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
-
-  const { data, error } = await getSupabase()
-    .from('comments')
-    .insert([{ name: name.trim(), text: text.trim(), is_approved: false }])
-    .select();
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data[0], { status: 201 });
 }

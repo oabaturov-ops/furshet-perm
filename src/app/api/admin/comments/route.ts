@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { getSupabase } from '@/lib/supabase'
+import { getDb } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,11 +8,12 @@ export async function GET() {
   const denied = await requireAdmin()
   if (denied) return denied
 
-  const { data, error } = await getSupabase()
-    .from('comments')
-    .select('*')
-    .order('created_at', { ascending: false })
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  try {
+    const { rows } = await getDb().query(
+      'select * from comments order by created_at desc'
+    )
+    return NextResponse.json(rows)
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
 }

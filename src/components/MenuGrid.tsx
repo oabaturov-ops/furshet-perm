@@ -6,9 +6,9 @@ import DishModal from '@/components/DishModal'
 
 type CartItem = { name: string; price: string; quantity: number; minQty?: number }
 
-type ApiCategory = { id: string; name: string; slug: string; sortOrder: number }
+export type MenuCategory = { id: string; name: string; slug: string; sortOrder: number }
 
-type ApiDish = {
+export type MenuDish = {
   id: string
   name: string
   description: string
@@ -24,17 +24,25 @@ type ApiDish = {
 export default function MenuGrid({
   cartItems,
   setCartItems,
+  initialCategories,
+  initialDishes,
 }: {
   cartItems: CartItem[]
   setCartItems: Dispatch<SetStateAction<CartItem[]>>
+  initialCategories: MenuCategory[]
+  initialDishes: MenuDish[]
 }) {
-  const [categories, setCategories] = useState<ApiCategory[]>([])
-  const [dishes, setDishes] = useState<ApiDish[]>([])
+  const [categories, setCategories] = useState<MenuCategory[]>(initialCategories)
+  const [dishes, setDishes] = useState<MenuDish[]>(initialDishes)
   const [active, setActive] = useState('all')
-  const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState<ApiDish | null>(null)
+  // С сервера меню уже пришло в HTML. Клиентский запрос — только страховка,
+  // если база на рендере была недоступна и список пустой.
+  const [loading, setLoading] = useState(initialDishes.length === 0)
+  const [selected, setSelected] = useState<MenuDish | null>(null)
 
   useEffect(() => {
+    if (initialDishes.length > 0) return
+
     let alive = true
     fetch('/api/menu')
       .then((r) => r.json())
@@ -50,7 +58,7 @@ export default function MenuGrid({
     return () => {
       alive = false
     }
-  }, [])
+  }, [initialDishes.length])
 
   const visible = useMemo(() => {
     const list = active === 'all' ? dishes : dishes.filter((d) => d.categoryId === active)
@@ -60,7 +68,7 @@ export default function MenuGrid({
   const countInCart = (name: string) =>
     cartItems.find((i) => i.name === name)?.quantity ?? 0
 
-  const addToCart = (dish: ApiDish, qty = 0) => {
+  const addToCart = (dish: MenuDish, qty = 0) => {
     const amount = Math.max(qty || 0, dish.minQty || 1, 1)
     setCartItems((prev) => {
       const existing = prev.find((i) => i.name === dish.name)
@@ -69,11 +77,19 @@ export default function MenuGrid({
           i.name === dish.name ? { ...i, quantity: i.quantity + amount } : i
         )
       }
-      return [...prev, { name: dish.name, price: String(dish.price), quantity: amount, minQty: dish.minQty || 1 }]
+      return [
+        ...prev,
+        {
+          name: dish.name,
+          price: String(dish.price),
+          quantity: amount,
+          minQty: dish.minQty || 1,
+        },
+      ]
     })
   }
 
-  const minQty = (dish: ApiDish) => (dish.minQty > 1 ? dish.minQty : null)
+  const minQty = (dish: MenuDish) => (dish.minQty > 1 ? dish.minQty : null)
 
   const tabClass = (isActive: boolean) =>
     `rounded-full border px-5 py-2 text-sm transition ${

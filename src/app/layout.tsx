@@ -1,6 +1,6 @@
 import { Playfair_Display, Manrope } from "next/font/google";
 import type { Metadata, Viewport } from "next";
-import { Analytics } from "@vercel/analytics/react";
+
 import Script from "next/script";
 import { SITE } from "@/lib/site";
 import "./globals.css";
@@ -117,7 +117,7 @@ export default function RootLayout({
         <script
           async
           dangerouslySetInnerHTML={{
-            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}`,
+            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(window.caches){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}`,
           }}
         />
         <script
@@ -149,7 +149,7 @@ export default function RootLayout({
           </div>
         </noscript>
       </body>
-      <Analytics />
+
     </html>
   );
 }
