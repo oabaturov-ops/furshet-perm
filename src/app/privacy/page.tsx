@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description:
     "Как фуршетная служба «Фуршет Пермь» собирает, хранит и обрабатывает персональные данные посетителей сайта.",
   robots: { index: true, follow: true },
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

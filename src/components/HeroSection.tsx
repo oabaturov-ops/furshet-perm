@@ -36,6 +36,14 @@ export default function HeroSection() {
       id="home"
       className="relative h-[calc(100svh-72px)] min-h-[520px] w-full overflow-hidden"
     >
+      {/*
+        Главный заголовок страницы. Визуально его заменяет монограмма,
+        но поисковику и скринридеру нужен H1 с описанием услуги.
+      */}
+      <h1 className="sr-only">
+        Фуршет в Перми — кейтеринг и фуршет с доставкой от фуршетной службы «Фуршет Пермь»
+      </h1>
+
       {/* Два фото: на мобильном — друг под другом */}
       <div className="absolute inset-0 grid grid-cols-1 gap-2 bg-[#faf6f0] md:grid-cols-2 md:gap-3">
         {SLIDES.map((slide, index) => (
@@ -48,6 +56,9 @@ export default function HeroSection() {
             <img
               src={slide.src}
               alt={slide.alt}
+              width={2000}
+              height={1331}
+              fetchPriority={index === 0 ? 'high' : 'auto'}
               className="h-full w-full object-cover transition-[filter] duration-[900ms] ease-out will-change-transform"
               style={{
                 transform: `translateY(${-lift}px) scale(1.16)`,
@@ -66,7 +77,7 @@ export default function HeroSection() {
       {/* Круг с монограммой по центру — как на референсе */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#faf6f0] shadow-[0_12px_45px_rgba(28,26,23,0.18)] md:h-36 md:w-36">
-                    <span className="font-serif text-2xl leading-none tracking-[0.08em] text-[#1c1a17] md:text-4xl">
+          <span className="font-serif text-2xl leading-none tracking-[0.08em] text-[#1c1a17] md:text-4xl">
             {MONOGRAM}
           </span>
         </div>
